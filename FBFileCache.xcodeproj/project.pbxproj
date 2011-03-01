@@ -1,0 +1,462 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4C094BC2131DB5480019ACAF /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC1131DB5480019ACAF /* UIKit.framework */; };
+		4C094BC4131DB5480019ACAF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC3131DB5480019ACAF /* Foundation.framework */; };
+		4C094BC6131DB5480019ACAF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC5131DB5480019ACAF /* CoreGraphics.framework */; };
+		4C094BCC131DB5480019ACAF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4C094BCA131DB5480019ACAF /* InfoPlist.strings */; };
+		4C094BCF131DB5480019ACAF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C094BCE131DB5480019ACAF /* main.m */; };
+		4C094BD2131DB5480019ACAF /* FBFileCacheAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C094BD1131DB5480019ACAF /* FBFileCacheAppDelegate.m */; };
+		4C094BD5131DB5480019ACAF /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4C094BD3131DB5480019ACAF /* MainWindow.xib */; };
+		4C094BD8131DB5480019ACAF /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C094BD7131DB5480019ACAF /* RootViewController.m */; };
+		4C094BDB131DB5480019ACAF /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4C094BD9131DB5480019ACAF /* RootViewController.xib */; };
+		4C094BE2131DB5480019ACAF /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC1131DB5480019ACAF /* UIKit.framework */; };
+		4C094BE3131DB5480019ACAF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC3131DB5480019ACAF /* Foundation.framework */; };
+		4C094BE4131DB5480019ACAF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C094BC5131DB5480019ACAF /* CoreGraphics.framework */; };
+		4C094BEC131DB5480019ACAF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4C094BEA131DB5480019ACAF /* InfoPlist.strings */; };
+		4C094BEF131DB5480019ACAF /* FBFileCacheTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 4C094BEE131DB5480019ACAF /* FBFileCacheTests.h */; };
+		4C094BF1131DB5480019ACAF /* FBFileCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C094BF0131DB5480019ACAF /* FBFileCacheTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4C094BE5131DB5480019ACAF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4C094BB4131DB5480019ACAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C094BBC131DB5480019ACAF;
+			remoteInfo = FBFileCache;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		4C094BBD131DB5480019ACAF /* FBFileCache.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FBFileCache.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C094BC1131DB5480019ACAF /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		4C094BC3131DB5480019ACAF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4C094BC5131DB5480019ACAF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		4C094BC9131DB5480019ACAF /* FBFileCache-Info.plist */ = {isa = PBXFileReference; path = "FBFileCache-Info.plist"; sourceTree = "<group>"; };
+		4C094BCB131DB5480019ACAF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4C094BCD131DB5480019ACAF /* FBFileCache-Prefix.pch */ = {isa = PBXFileReference; path = "FBFileCache-Prefix.pch"; sourceTree = "<group>"; };
+		4C094BCE131DB5480019ACAF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4C094BD0131DB5480019ACAF /* FBFileCacheAppDelegate.h */ = {isa = PBXFileReference; path = FBFileCacheAppDelegate.h; sourceTree = "<group>"; };
+		4C094BD1131DB5480019ACAF /* FBFileCacheAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FBFileCacheAppDelegate.m; sourceTree = "<group>"; };
+		4C094BD4131DB5480019ACAF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
+		4C094BD6131DB5480019ACAF /* RootViewController.h */ = {isa = PBXFileReference; path = RootViewController.h; sourceTree = "<group>"; };
+		4C094BD7131DB5480019ACAF /* RootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
+		4C094BDA131DB5480019ACAF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RootViewController.xib; sourceTree = "<group>"; };
+		4C094BE1131DB5480019ACAF /* FBFileCacheTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FBFileCacheTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C094BE9131DB5480019ACAF /* FBFileCacheTests-Info.plist */ = {isa = PBXFileReference; path = "FBFileCacheTests-Info.plist"; sourceTree = "<group>"; };
+		4C094BEB131DB5480019ACAF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4C094BED131DB5480019ACAF /* FBFileCacheTests-Prefix.pch */ = {isa = PBXFileReference; path = "FBFileCacheTests-Prefix.pch"; sourceTree = "<group>"; };
+		4C094BEE131DB5480019ACAF /* FBFileCacheTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBFileCacheTests.h; sourceTree = "<group>"; };
+		4C094BF0131DB5480019ACAF /* FBFileCacheTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FBFileCacheTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4C094BBA131DB5480019ACAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BC2131DB5480019ACAF /* UIKit.framework in Frameworks */,
+				4C094BC4131DB5480019ACAF /* Foundation.framework in Frameworks */,
+				4C094BC6131DB5480019ACAF /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C094BDD131DB5480019ACAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BE2131DB5480019ACAF /* UIKit.framework in Frameworks */,
+				4C094BE3131DB5480019ACAF /* Foundation.framework in Frameworks */,
+				4C094BE4131DB5480019ACAF /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4C094BB2131DB5480019ACAF = {
+			isa = PBXGroup;
+			children = (
+				4C094BC7131DB5480019ACAF /* FBFileCache */,
+				4C094BE7131DB5480019ACAF /* FBFileCacheTests */,
+				4C094BC0131DB5480019ACAF /* Frameworks */,
+				4C094BBE131DB5480019ACAF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4C094BBE131DB5480019ACAF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BBD131DB5480019ACAF /* FBFileCache.app */,
+				4C094BE1131DB5480019ACAF /* FBFileCacheTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4C094BC0131DB5480019ACAF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BC1131DB5480019ACAF /* UIKit.framework */,
+				4C094BC3131DB5480019ACAF /* Foundation.framework */,
+				4C094BC5131DB5480019ACAF /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4C094BC7131DB5480019ACAF /* FBFileCache */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BD0131DB5480019ACAF /* FBFileCacheAppDelegate.h */,
+				4C094BD1131DB5480019ACAF /* FBFileCacheAppDelegate.m */,
+				4C094BD3131DB5480019ACAF /* MainWindow.xib */,
+				4C094BD6131DB5480019ACAF /* RootViewController.h */,
+				4C094BD7131DB5480019ACAF /* RootViewController.m */,
+				4C094BD9131DB5480019ACAF /* RootViewController.xib */,
+				4C094BC8131DB5480019ACAF /* Supporting Files */,
+			);
+			path = FBFileCache;
+			sourceTree = "<group>";
+		};
+		4C094BC8131DB5480019ACAF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BC9131DB5480019ACAF /* FBFileCache-Info.plist */,
+				4C094BCA131DB5480019ACAF /* InfoPlist.strings */,
+				4C094BCD131DB5480019ACAF /* FBFileCache-Prefix.pch */,
+				4C094BCE131DB5480019ACAF /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4C094BE7131DB5480019ACAF /* FBFileCacheTests */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BEE131DB5480019ACAF /* FBFileCacheTests.h */,
+				4C094BF0131DB5480019ACAF /* FBFileCacheTests.m */,
+				4C094BE8131DB5480019ACAF /* Supporting Files */,
+			);
+			path = FBFileCacheTests;
+			sourceTree = "<group>";
+		};
+		4C094BE8131DB5480019ACAF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4C094BE9131DB5480019ACAF /* FBFileCacheTests-Info.plist */,
+				4C094BEA131DB5480019ACAF /* InfoPlist.strings */,
+				4C094BED131DB5480019ACAF /* FBFileCacheTests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4C094BBC131DB5480019ACAF /* FBFileCache */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C094BF4131DB5480019ACAF /* Build configuration list for PBXNativeTarget "FBFileCache" */;
+			buildPhases = (
+				4C094BB9131DB5480019ACAF /* Sources */,
+				4C094BBA131DB5480019ACAF /* Frameworks */,
+				4C094BBB131DB5480019ACAF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FBFileCache;
+			productName = FBFileCache;
+			productReference = 4C094BBD131DB5480019ACAF /* FBFileCache.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4C094BE0131DB5480019ACAF /* FBFileCacheTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C094BF7131DB5480019ACAF /* Build configuration list for PBXNativeTarget "FBFileCacheTests" */;
+			buildPhases = (
+				4C094BDC131DB5480019ACAF /* Sources */,
+				4C094BDD131DB5480019ACAF /* Frameworks */,
+				4C094BDE131DB5480019ACAF /* Resources */,
+				4C094BDF131DB5480019ACAF /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4C094BE6131DB5480019ACAF /* PBXTargetDependency */,
+			);
+			name = FBFileCacheTests;
+			productName = FBFileCacheTests;
+			productReference = 4C094BE1131DB5480019ACAF /* FBFileCacheTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4C094BB4131DB5480019ACAF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "ファイブテクノロジー株式会社";
+			};
+			buildConfigurationList = 4C094BB7131DB5480019ACAF /* Build configuration list for PBXProject "FBFileCache" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4C094BB2131DB5480019ACAF;
+			productRefGroup = 4C094BBE131DB5480019ACAF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4C094BBC131DB5480019ACAF /* FBFileCache */,
+				4C094BE0131DB5480019ACAF /* FBFileCacheTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4C094BBB131DB5480019ACAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BCC131DB5480019ACAF /* InfoPlist.strings in Resources */,
+				4C094BD5131DB5480019ACAF /* MainWindow.xib in Resources */,
+				4C094BDB131DB5480019ACAF /* RootViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C094BDE131DB5480019ACAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BEC131DB5480019ACAF /* InfoPlist.strings in Resources */,
+				4C094BEF131DB5480019ACAF /* FBFileCacheTests.h in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4C094BDF131DB5480019ACAF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4C094BB9131DB5480019ACAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BCF131DB5480019ACAF /* main.m in Sources */,
+				4C094BD2131DB5480019ACAF /* FBFileCacheAppDelegate.m in Sources */,
+				4C094BD8131DB5480019ACAF /* RootViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C094BDC131DB5480019ACAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C094BF1131DB5480019ACAF /* FBFileCacheTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4C094BE6131DB5480019ACAF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C094BBC131DB5480019ACAF /* FBFileCache */;
+			targetProxy = 4C094BE5131DB5480019ACAF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4C094BCA131DB5480019ACAF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C094BCB131DB5480019ACAF /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		4C094BD3131DB5480019ACAF /* MainWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C094BD4131DB5480019ACAF /* en */,
+			);
+			name = MainWindow.xib;
+			sourceTree = "<group>";
+		};
+		4C094BD9131DB5480019ACAF /* RootViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C094BDA131DB5480019ACAF /* en */,
+			);
+			name = RootViewController.xib;
+			sourceTree = "<group>";
+		};
+		4C094BEA131DB5480019ACAF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C094BEB131DB5480019ACAF /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4C094BF2131DB5480019ACAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		4C094BF3131DB5480019ACAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		4C094BF5131DB5480019ACAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FBFileCache/FBFileCache-Prefix.pch";
+				INFOPLIST_FILE = "FBFileCache/FBFileCache-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		4C094BF6131DB5480019ACAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FBFileCache/FBFileCache-Prefix.pch";
+				INFOPLIST_FILE = "FBFileCache/FBFileCache-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		4C094BF8131DB5480019ACAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FBFileCache.app/FBFileCache";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FBFileCacheTests/FBFileCacheTests-Prefix.pch";
+				INFOPLIST_FILE = "FBFileCacheTests/FBFileCacheTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		4C094BF9131DB5480019ACAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FBFileCache.app/FBFileCache";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FBFileCacheTests/FBFileCacheTests-Prefix.pch";
+				INFOPLIST_FILE = "FBFileCacheTests/FBFileCacheTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4C094BB7131DB5480019ACAF /* Build configuration list for PBXProject "FBFileCache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C094BF2131DB5480019ACAF /* Debug */,
+				4C094BF3131DB5480019ACAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C094BF4131DB5480019ACAF /* Build configuration list for PBXNativeTarget "FBFileCache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C094BF5131DB5480019ACAF /* Debug */,
+				4C094BF6131DB5480019ACAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		4C094BF7131DB5480019ACAF /* Build configuration list for PBXNativeTarget "FBFileCacheTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C094BF8131DB5480019ACAF /* Debug */,
+				4C094BF9131DB5480019ACAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4C094BB4131DB5480019ACAF /* Project object */;
+}
