@@ -39,22 +39,27 @@
     return [path stringByAppendingPathComponent:TEST_CACHE_DIRECTORY];
 }
 
-- (void)removeTemporary
+- (void)removeAtPath:(NSString*)path
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSError* error = nil;
-    if ([fileManager fileExistsAtPath:self.temporaryPath]) {
-        [fileManager removeItemAtPath:self.temporaryPath error:&error];
+    if ([fileManager fileExistsAtPath:path]) {
+        [fileManager removeItemAtPath:path error:&error];
         if (error) {
             NSLog(@"[ERROR] %@", error);
         }
     }
 }
 
+- (void)removeAllDirectories
+{
+    [self removeAtPath:self.temporaryPath];
+    [self removeAtPath:[self cachePath]];
+    [self removeAtPath:[FBFileCacheManager defaultPath]];
+}
+
 - (void)setupTemporary
 {
-    [self removeTemporary];
-
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSError* error = nil;
     NSLog(@"[INFO] Setup Temporary directory...");
@@ -81,14 +86,20 @@
     }
 }
 
-- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager
+- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager moveFile:(BOOL)moveFile
 {
     int i;
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
         NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forKey:url];
+        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forURL:url moveFile:moveFile];
     }   
+    
+}
+
+- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager
+{
+    [self putAllTestFilesWithManager:fileCacheManager moveFile:NO];
 }
 
 // overwrite old cache files (image-00..09.png) by (image-10..11.png)
@@ -98,8 +109,9 @@
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
         NSString* filename2 = [NSString stringWithFormat:@"image-%02d.png", i+10];
-        NSURL* url = [NSURL URLWithString:filename2 relativeToURL:self.baseURL];
-        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forKey:url];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename2] forURL:url];
+        NSLog(@"putFile:%@ forURL:%@", filename2, filename);
     }   
 }
 
@@ -107,11 +119,18 @@
 - (BOOL)compareFile:(NSString*)path1 withFile:(NSString*)path2
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSError* error = nil;
-    NSDictionary* attrs1 = [fileManager attributesOfItemAtPath:path1 error:&error];
-    NSDictionary* attrs2 = [fileManager attributesOfItemAtPath:path2 error:&error];
-    
-    if ([attrs1 objectForKey:NSFileSize] == [attrs2 objectForKey:NSFileSize]) {
+    NSError* error1 = nil;
+    NSError* error2 = nil;
+    NSDictionary* attrs1 = [fileManager attributesOfItemAtPath:path1 error:&error1];
+    if (error1) {
+        NSLog(@"[ERROR] %@", error1);
+    }
+    NSDictionary* attrs2 = [fileManager attributesOfItemAtPath:path2 error:&error2];
+    if (error2) {
+        NSLog(@"[ERROR] %@", error2);
+    }
+    if ([[attrs1 objectForKey:NSFileSize] unsignedIntegerValue]
+        == [[attrs2 objectForKey:NSFileSize] unsignedIntegerValue]) {
         return YES;
     } else {
         return NO;
@@ -132,7 +151,6 @@
     
     NSUInteger usingSize = 0;
     for (NSString* file in files) {
-        NSLog(@"file=%@", file);
         NSDictionary* attributes = [fileManager attributesOfItemAtPath:file error:&error];
         NSNumber* size = [attributes objectForKey:NSFileSize];
         usingSize += [size unsignedIntegerValue];
@@ -148,15 +166,17 @@
     [super setUp];
     
     // Set-up code here.
+    [self removeAllDirectories];
     self.baseURL = [NSURL URLWithString:@"https://www.hoge.hoge.com/some/where/"];
     self.fileCacheManager = [[[FBFileCacheManager alloc]
                               initWithPath:[self cachePath] size:100] autorelease];
+
 }
 
 - (void)tearDown
 {
     // Tear-down code here.
-    [self removeTemporary];
+    [self removeAllDirectories];
     
     self.temporaryPath = nil;
     self.baseURL = nil;
@@ -172,20 +192,18 @@
 //
 // Initialize
 //
-- (void)testInit
-{    
+- (void)testInitWithPathSize
+{
     STAssertEqualObjects(self.fileCacheManager.path, [self cachePath], nil);
     STAssertEquals((NSUInteger)self.fileCacheManager.maxSize, (NSUInteger)100, nil);    
 }
 
-- (void)testInitWithRelativePath
+- (void)testInitWithSize
 {
+    self.fileCacheManager = [[FBFileCacheManager alloc] initWithSize:100];
 
-    FBFileCacheManager* manager = [[FBFileCacheManager alloc]
-                                   initWithRelativePath:@"test" size:100];
-    STAssertEqualObjects(manager, [[self cachePath] stringByAppendingPathComponent:@"test"], nil);
-    STAssertEquals((NSUInteger)manager.maxSize, (NSUInteger)100, nil);    
-
+    STAssertEqualObjects(self.fileCacheManager.path, [FBFileCacheManager defaultPath], nil);
+    STAssertEquals((NSUInteger)self.fileCacheManager.maxSize, (NSUInteger)100, nil);        
 }
 
 - (void)testInitWhenResume
@@ -217,25 +235,18 @@
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         filename = [NSString stringWithFormat:@"image-%02d.png", i];
         url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForKey:url];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
 
-        NSString* cachedFilePath = [self.fileCacheManager.path stringByAppendingPathComponent:filename];
-        STAssertEqualObjects(cachedFile.path, cachedFilePath, nil);
-
-        NSURL* cachedFileURL = [NSURL URLWithString:cachedFilePath];
-        STAssertEqualObjects(cachedFile.URL, cachedFileURL, nil);
-        
         NSString* temporaryPath = [self.temporaryPath stringByAppendingPathComponent:filename];
         STAssertTrue([self compareFile:temporaryPath
-                              withFile:cachedFilePath], @"%@", temporaryPath);
+                              withFile:cachedFile.path], @"%@", temporaryPath);
     }
-    
 }
 
 - (void)testPutWithMoveFile
 {
     [self setupTemporary];
-    [self putAllTestFilesWithManager:self.fileCacheManager];
+    [self putAllTestFilesWithManager:self.fileCacheManager moveFile:YES];
 
     NSString* filename = nil;
     NSURL* url = nil;
@@ -245,20 +256,14 @@
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         filename = [NSString stringWithFormat:@"image-%02d.png", i];
         url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForKey:url];
-        
-        NSString* cachedFilePath = [self.fileCacheManager.path stringByAppendingPathComponent:filename];
-        STAssertEqualObjects(cachedFile.path, cachedFilePath, nil);
-        
-        NSURL* cachedFileURL = [NSURL URLWithString:cachedFilePath];
-        STAssertEqualObjects(cachedFile.URL, cachedFileURL, nil);
-        
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+
         NSString* temporaryPath = [self.temporaryPath stringByAppendingPathComponent:filename];
         STAssertTrue(![self fileExistsPath:temporaryPath], @"%@", temporaryPath);
 
         NSString* originalPath = [[NSBundle bundleForClass:[self class]] resourcePath];
         STAssertTrue([self compareFile:[originalPath stringByAppendingPathComponent:filename]
-                              withFile:cachedFilePath], @"%@", originalPath);
+                              withFile:cachedFile.path], @"%@", originalPath);
     }
 }
 
@@ -273,11 +278,15 @@
         NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
         NSString* filename2 = [NSString stringWithFormat:@"image-%02d.png", i+10];
         NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForKey:url];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
 
         NSString* originalPath = [[NSBundle bundleForClass:[self class]] resourcePath];
         STAssertTrue([self compareFile:[originalPath stringByAppendingPathComponent:filename2]
                               withFile:cachedFile.path], @"%@", originalPath);
+/*
+        NSLog(@"[1] %@", cachedFile.path);
+        NSLog(@"[2] %@", [originalPath stringByAppendingPathComponent:filename2]);
+*/
     }
 }
 
@@ -300,7 +309,7 @@
         if ((i % 2) == 0) {
             filename = [NSString stringWithFormat:@"image-%02d.png", i];
             url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-            [self.fileCacheManager removeCachedFileForKey:url];            
+            [self.fileCacheManager removeCachedFileForURL:url];            
         }
     }
 
@@ -308,10 +317,11 @@
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         filename = [NSString stringWithFormat:@"image-%02d.png", i];
         url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
         if ((i % 2) == 0) {
-            STAssertTrue(![self fileExistsPath:[url path]], @"%@", [url path]);
+            STAssertTrue(![self fileExistsPath:cachedFile.path], @"%@", cachedFile.path);
         } else {
-            STAssertTrue([self fileExistsPath:[url path]], @"%@", [url path]);
+            STAssertTrue([self fileExistsPath:cachedFile.path], @"%@", cachedFile.path);
         }
     }
 }
@@ -331,7 +341,6 @@
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSArray* files = [fileManager contentsOfDirectoryAtPath:[self cachePath]
                                                       error:&error];
-    NSLog(@"files: %@", files);
     if (error) {
         NSLog(@"[ERROR] %@", error);
     }

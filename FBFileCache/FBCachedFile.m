@@ -19,11 +19,11 @@
 #pragma mark -
 #pragma mark Initialization and deallocation
 
-- (id)initWithFile:(NSURL*)URL
+- (id)initWithFile:(NSString*)filePath
 {
     self = [super init];
     if (self) {
-        self.URL = URL;
+        self.URL = [NSURL fileURLWithPath:filePath];
     }
     return self;
 }
@@ -51,6 +51,10 @@
     NSError* error = nil;
     NSDictionary* attributes = [[NSFileManager defaultManager]
                                 attributesOfItemAtPath:self.path error:&error];
+    if (error) {
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+        return nil;
+    }
     return [attributes objectForKey:NSFileCreationDate];
 }
 

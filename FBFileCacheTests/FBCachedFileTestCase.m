@@ -46,7 +46,7 @@
 }
 - (FBCachedFile*)sampleCachedFile
 {
-    FBCachedFile* cachedFile = [[[FBCachedFile alloc] initWithFile:[self sampleURL]] autorelease];
+    FBCachedFile* cachedFile = [[[FBCachedFile alloc] initWithFile:[self samplePath]] autorelease];
     return cachedFile;
 }
 

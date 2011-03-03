@@ -19,6 +19,7 @@
 @property (readonly) NSDate* creationDate;
 @property (readonly) NSTimeInterval timeIntervalSinceNow;
 
-- (id)initWithFile:(NSURL*)URL;
+- (id)initWithFile:(NSString*)filePath;
+//- (NSData*)data;
 
 @end
