@@ -12,6 +12,9 @@
 
 @implementation FBCachedFileTestCase
 
+
+#pragma mark -
+#pragma mark Pre-Post functions
 - (void)setUp
 {
     [super setUp];
@@ -38,7 +41,6 @@
 
 - (NSURL*)sampleURL
 {
-    //    NSString* path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     NSURL* url = [NSURL fileURLWithPath:[self samplePath]];
     return url;
 }
@@ -61,13 +63,13 @@
 - (void)testPath
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
-    STAssertEqualObjects([self samplePath], cachedFile.path, @".path does not mache.");
+    STAssertEqualObjects(cachedFile.path, [self samplePath], @".path does not mache.");
 }
 
 - (void)testURL
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
-    STAssertEqualObjects([self sampleURL], cachedFile.URL, @".URL does not mache.");
+    STAssertEqualObjects(cachedFile.URL, [self sampleURL], @".URL does not mache.");
 }
 
 - (void)testCreationDate
@@ -75,7 +77,7 @@
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSDictionary* attributes = [self attributesOfSample];
     NSDate* creationDate = [attributes objectForKey:NSFileCreationDate];
-    STAssertEqualObjects(creationDate, cachedFile.creationDate, @".creationDate does not mache.");
+    STAssertEqualObjects(cachedFile.creationDate, creationDate, @".creationDate does not mache.");
     
 }
 
@@ -84,7 +86,9 @@
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSDictionary* attributes = [self attributesOfSample];
     NSDate* creationDate = [attributes objectForKey:NSFileCreationDate];
-    STAssertEquals((NSInteger)[creationDate timeIntervalSinceNow], (NSInteger)cachedFile.timeIntervalSinceNow, @".timeIntervalSinceNow does not mache.");
+    STAssertEquals((NSInteger)cachedFile.timeIntervalSinceNow,
+                   (NSInteger)[creationDate timeIntervalSinceNow],
+                   @".timeIntervalSinceNow does not mache.");
     
 }
 
