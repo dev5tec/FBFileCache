@@ -11,13 +11,16 @@
 #import <UIKit/UIKit.h>
 //#import "application_headers" as required
 
-
+@class FBFileCacheManager;
 @interface FBFileCacheManagerTestCase : SenTestCase {
     
+    FBFileCacheManager* fileCacheManager_;
+
     NSString* temporaryPath_;
     NSURL* baseURL_;
 }
 
+@property (nonatomic, retain) FBFileCacheManager* fileCacheManager;
 @property (nonatomic, copy) NSString* temporaryPath;
 @property (nonatomic, retain) NSURL* baseURL;
 
