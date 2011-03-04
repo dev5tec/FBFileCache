@@ -2,8 +2,8 @@
 //  FBFileCacheManagerTestCase.h
 //  FBFileCache
 //
-//  Created by 橋口 湖 on 11/03/02.
-//  Copyright 2011 ファイブテクノロジー株式会社. All rights reserved.
+//  Created by Hiroshi Hashiguchi on 11/03/02.
+//  Copyright 2011 Five-technology Co.,Ltd.. All rights reserved.
 //
 //  See Also: http://developer.apple.com/iphone/library/documentation/Xcode/Conceptual/iphone_development/135-Unit_Testing_Applications/unit_testing_applications.html
 
