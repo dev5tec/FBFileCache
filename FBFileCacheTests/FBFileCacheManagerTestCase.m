@@ -314,7 +314,44 @@
     STAssertEqualObjects(cachedFile2.data, data2, nil);
 }
 
+- (void)testPutAndGetWithIncludingParameters
+{
+    // case1: includingParameters == NO
+    self.fileCacheManager.includingParameters = NO;
+    NSURL* url11 = [NSURL URLWithString:@"https://www.test.com/test1/action"];
+    NSURL* url12 = [NSURL URLWithString:@"https://www.test.com/test1/action?a=1&b=2"];
+    NSString* filePath11 = [[NSBundle bundleForClass:[self class]]
+                          pathForResource:@"image-01" ofType:@"png"];
+    NSData* data11 = [NSData dataWithContentsOfFile:filePath11];
+    NSString* filePath12 = [[NSBundle bundleForClass:[self class]]
+                           pathForResource:@"image-02" ofType:@"png"];
+    NSData* data12 = [NSData dataWithContentsOfFile:filePath12];
 
+    FBCachedFile* cachedFile11 = [self.fileCacheManager putData:data11 forURL:url11];
+    FBCachedFile* cachedFile12 = [self.fileCacheManager putData:data12 forURL:url12];
+    
+    STAssertEqualObjects(cachedFile11.data, data12, nil); // over written
+    STAssertEqualObjects(cachedFile12.data, data12, nil);
+
+    
+    // case2: includingParameters == YES;
+    self.fileCacheManager.includingParameters = YES;
+
+    NSURL* url21 = [NSURL URLWithString:@"https://www.test.com/test2/action"];
+    NSURL* url22 = [NSURL URLWithString:@"https://www.test.com/test2/action?a=1&b=2"];
+    NSString* filePath21 = [[NSBundle bundleForClass:[self class]]
+                            pathForResource:@"image-03" ofType:@"png"];
+    NSData* data21 = [NSData dataWithContentsOfFile:filePath21];
+    NSString* filePath22 = [[NSBundle bundleForClass:[self class]]
+                            pathForResource:@"image-04" ofType:@"png"];
+    NSData* data22 = [NSData dataWithContentsOfFile:filePath22];
+    
+    FBCachedFile* cachedFile21 = [self.fileCacheManager putData:data21 forURL:url21];
+    FBCachedFile* cachedFile22 = [self.fileCacheManager putData:data22 forURL:url22];
+    
+    STAssertEqualObjects(cachedFile21.data, data21, nil); // over written
+    STAssertEqualObjects(cachedFile22.data, data22, nil);
+}
 
 
 - (void)testGetNull

@@ -23,12 +23,22 @@
 @synthesize path = path_;
 @synthesize maxSize = maxSize_;
 @synthesize usingSize = usingSize_;
+@synthesize includingParameters = includingParameters_;
 
 #pragma mark -
 #pragma mark Private
 - (NSString*)_hashStringFromURL:(NSURL*)url
 {
-    const char *cStr = [[url absoluteString] UTF8String];
+    NSString* urlString = [url absoluteString];
+    const char *cStr = [urlString UTF8String];
+
+    if (!self.includingParameters) {
+        NSRange range = [urlString rangeOfString:@"?"];
+        if (range.location != NSNotFound) {
+            cStr = [[urlString substringToIndex:range.location] UTF8String];
+        }
+    }
+
     unsigned char result[16];
     CC_MD5( cStr, strlen(cStr), result ); // This is the md5 call
     return [NSString stringWithFormat:
@@ -101,6 +111,7 @@
         self.path = path;
         self.maxSize = size;
         self.usingSize = [self _calculateUsingSize];
+        self.includingParameters = YES;
     }
     return self;
 }

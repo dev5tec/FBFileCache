@@ -13,8 +13,10 @@
 @interface FBFileCacheManager : NSObject {
  
     NSString* path_;
-    NSUInteger maxSize_;    // [MB]
-    NSUInteger usingSize_;  // [B]
+    NSUInteger maxSize_;        // [MB]
+    NSUInteger usingSize_;      // [B]
+    
+    BOOL includingParameters_;  // default: YES (include URL parameters for the hash key)
 }
 
 #pragma mark -
@@ -22,6 +24,7 @@
 @property (nonatomic, copy, readonly) NSString* path;
 @property (nonatomic, assign) NSUInteger maxSize;
 @property (nonatomic, assign, readonly) NSUInteger usingSize;
+@property (nonatomic, assign) BOOL includingParameters;
 
 // Initializing a New Object
 - (id)initWithSize:(NSUInteger)size;
