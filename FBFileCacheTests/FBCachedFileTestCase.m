@@ -60,19 +60,19 @@
 
 #pragma mark -
 #pragma mark Test cases
-- (void)testPath
+- (void)testProperty_Path
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
     STAssertEqualObjects(cachedFile.path, [self samplePath], @".path does not mache.");
 }
 
-- (void)testURL
+- (void)testProperty_URL
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
     STAssertEqualObjects(cachedFile.URL, [self sampleURL], @".URL does not mache.");
 }
 
-- (void)testCreationDate
+- (void)testProperty_CreationDate
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSDictionary* attributes = [self attributesOfSample];
@@ -81,7 +81,7 @@
     
 }
 
-- (void)testTimeIntervalSinceNow {
+- (void)testProperty_TimeIntervalSinceNow {
 
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSDictionary* attributes = [self attributesOfSample];
@@ -92,6 +92,11 @@
     
 }
 
-
+- (void)testPropery_Data
+{
+    FBCachedFile* cachedFile = [self sampleCachedFile];
+    NSData* data = [NSData dataWithContentsOfFile:cachedFile.path];
+    STAssertEqualObjects(cachedFile.data, data, nil);
+}
 
 @end

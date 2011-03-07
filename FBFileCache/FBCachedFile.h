@@ -18,8 +18,8 @@
 @property (nonatomic, retain, readonly) NSURL* URL;
 @property (readonly) NSDate* creationDate;
 @property (readonly) NSTimeInterval timeIntervalSinceNow;
+@property (readonly) NSData* data;
 
 - (id)initWithFile:(NSString*)filePath;
-//- (NSData*)data;
 
 @end

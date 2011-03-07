@@ -14,6 +14,8 @@
 #define TEST_IMAGE_TOTAL_NUM  20
 #define TEST_TEMPORARY_DIRECTORY @"_FBFileCacheTests_Temporary_"
 #define TEST_CACHE_DIRECTORY @"_FBFileCacheTests_Cache_"
+#define TEST_CACHE_URL @"https://www.hoge.hoge.com/some/where/"
+#define TEST_DUMMY_URL @"https://www.dummy.dummy.com/some/where"
 
 @implementation FBFileCacheManagerTestCase
 
@@ -111,7 +113,6 @@
         NSString* filename2 = [NSString stringWithFormat:@"image-%02d.png", i+10];
         NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
         [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename2] forURL:url];
-        NSLog(@"putFile:%@ forURL:%@", filename2, filename);
     }   
 }
 
@@ -151,7 +152,7 @@
     
     NSUInteger usingSize = 0;
     for (NSString* file in files) {
-        NSDictionary* attributes = [fileManager attributesOfItemAtPath:file error:&error];
+        NSDictionary* attributes = [fileManager attributesOfItemAtPath:[[self cachePath] stringByAppendingPathComponent:file] error:&error];
         NSNumber* size = [attributes objectForKey:NSFileSize];
         usingSize += [size unsignedIntegerValue];
     }
@@ -167,7 +168,7 @@
     
     // Set-up code here.
     [self removeAllDirectories];
-    self.baseURL = [NSURL URLWithString:@"https://www.hoge.hoge.com/some/where/"];
+    self.baseURL = [NSURL URLWithString:TEST_CACHE_URL];
     self.fileCacheManager = [[[FBFileCacheManager alloc]
                               initWithPath:[self cachePath] size:100] autorelease];
 
@@ -213,16 +214,14 @@
     
     FBFileCacheManager* manager2 = [[FBFileCacheManager alloc]
                                     initWithPath:[self cachePath] size:100];
-    [self putAllTestFilesWithManager:manager2];
-    
-    STAssertEquals(self.fileCacheManager.usingSize, [self usingSize], nil);
+    STAssertEquals(manager2.usingSize, [self usingSize], nil);
 }
 
 
 //
 // put
 //
-- (void)testPutAtFirst
+- (void)testPutAndGetAtFirst
 {
     [self setupTemporary];
     [self putAllTestFilesWithManager:self.fileCacheManager];
@@ -243,7 +242,7 @@
     }
 }
 
-- (void)testPutWithMoveFile
+- (void)testPutAndGetWithMoveFile
 {
     [self setupTemporary];
     [self putAllTestFilesWithManager:self.fileCacheManager moveFile:YES];
@@ -267,7 +266,7 @@
     }
 }
 
-- (void)testPutByUpdating
+- (void)testPutAndGetByUpdating
 {
     [self setupTemporary];
     [self putAllTestFilesWithManager:self.fileCacheManager];
@@ -289,6 +288,42 @@
 */
     }
 }
+
+// at first and update
+- (void)testPutDataAndGetData
+{
+    NSURL* url = [NSURL URLWithString:@"test.file"
+                        relativeToURL:[NSURL URLWithString:TEST_CACHE_URL]];
+
+    // 1st
+    NSString* filePath = [[NSBundle bundleForClass:[self class]]
+                           pathForResource:@"sample" ofType:@"jpg"];
+    NSData* data1 = [NSData dataWithContentsOfFile:filePath];
+    [self.fileCacheManager putData:data1 forURL:url];
+
+    FBCachedFile* cachedFile1 = [self.fileCacheManager cachedFileForURL:url];
+    STAssertEqualObjects(cachedFile1.data, data1, nil);
+
+    // 2nd (update)
+    NSString* filePath2 = [[NSBundle bundleForClass:[self class]]
+                          pathForResource:@"image-00" ofType:@"png"];
+    NSData* data2 = [NSData dataWithContentsOfFile:filePath2];
+    [self.fileCacheManager putData:data2 forURL:url];
+
+    FBCachedFile* cachedFile2 = [self.fileCacheManager cachedFileForURL:url];
+    STAssertEqualObjects(cachedFile2.data, data2, nil);
+}
+
+
+
+
+- (void)testGetNull
+{
+    NSURL* url = [NSURL URLWithString:TEST_DUMMY_URL];
+    FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+    STAssertNil(cachedFile, nil);
+}
+
 
 //
 // remove
@@ -324,6 +359,9 @@
             STAssertTrue([self fileExistsPath:cachedFile.path], @"%@", cachedFile.path);
         }
     }
+
+    // (4) check size after removing
+    STAssertEquals(self.fileCacheManager.usingSize, [self usingSize], nil);
 }
 
 - (void)testRemoveAll
@@ -346,6 +384,7 @@
     }
     STAssertNotNil(files, nil);
     STAssertTrue([files count] == 0, @"%@", files);
+    STAssertTrue(self.fileCacheManager.usingSize == 0, @"%@", files);
 }
 
 
@@ -357,7 +396,6 @@
     // setup files
     [self setupTemporary];
     [self putAllTestFilesWithManager:self.fileCacheManager];
-    
     STAssertEquals(self.fileCacheManager.usingSize, [self usingSize], nil);
 }
 

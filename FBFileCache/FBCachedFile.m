@@ -63,4 +63,10 @@
     return [self.creationDate timeIntervalSinceNow];
 }
 
+- (NSData*)data
+{
+    return [NSData dataWithContentsOfURL:self.URL];
+}
+
+
 @end

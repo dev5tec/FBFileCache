@@ -48,6 +48,7 @@
 		4C799BE0131E0ABF00AB4CA7 /* image-02.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BD6131E0ABF00AB4CA7 /* image-02.png */; };
 		4C799BE1131E0ABF00AB4CA7 /* image-01.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BD7131E0ABF00AB4CA7 /* image-01.png */; };
 		4C799BE4131E146B00AB4CA7 /* image-00.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BE3131E146B00AB4CA7 /* image-00.png */; };
+		4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F5A131DD758000A76E3 /* FBCachedFileTestCase.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -390,6 +391,7 @@
 				4C2D7F67131DE690000A76E3 /* FBCachedFile.m in Sources */,
 				4C2D7F68131DE693000A76E3 /* FBFileCacheManager.m in Sources */,
 				4C2D7F6B131DEA20000A76E3 /* FBFileCacheManagerTestCase.m in Sources */,
+				4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

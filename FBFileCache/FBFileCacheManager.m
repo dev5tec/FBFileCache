@@ -40,18 +40,6 @@
 			]; 
 }
 
-- (NSUInteger)_calculateUsingSize
-{
-    // not implementated
-    return 0;
-}
-
-+ (NSString*)defaultPath
-{
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    return [path stringByAppendingPathComponent:FB_CACHE_PATH];
-}
-
 - (BOOL)_createDirectoryAtPath:(NSString*)path
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -62,7 +50,7 @@
                                           attributes:nil
                                                error:&error];
     if (!result) {
-        NSLog(@"[ERROR] %@", error);
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
     }
     return result;
 }
@@ -72,6 +60,33 @@
     NSString* filename = [[self _hashStringFromURL:sourceURL]
                           stringByAppendingPathExtension:[sourceURL pathExtension]];
     return [self.path stringByAppendingPathComponent:filename];
+}
+
+- (NSUInteger)_calculateUsingSize
+{
+    // TODO: recursive
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSUInteger totalSize = 0;
+    
+    NSError* error = nil;
+    NSArray* files = [fileManager contentsOfDirectoryAtPath:self.path error:&error];
+    if (error) {
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+        return 0;
+    }
+    for (NSString* file in files) {
+        error =nil;
+        NSDictionary* attributes =
+        [fileManager attributesOfItemAtPath:[self.path stringByAppendingPathComponent:file]
+                                      error:&error];
+        if (error) {
+            NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+        } else {
+            totalSize += [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+        }
+    }
+    return totalSize;
 }
 
 
@@ -86,7 +101,6 @@
         self.path = path;
         self.maxSize = size;
         self.usingSize = [self _calculateUsingSize];
-
     }
     return self;
 }
@@ -103,7 +117,7 @@
 
 - (void)setMaxSize:(NSUInteger)size
 {
-    // not implementated
+    // TODO: not implementated
     maxSize_ = size;
 }
 
@@ -146,11 +160,28 @@
     FBCachedFile* cachedFile = 
         [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
 
-    
-    // TODO: update information
+    NSDictionary* attributes = [fileManager attributesOfItemAtPath:cachedFilePath error:&error];
+    self.usingSize += [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
 
     return cachedFile;
 }
+
+- (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL
+{
+    NSString* cachedFilePath = [self _cachedFilePathForURL:sourceURL];
+    NSError* error = nil;
+    [contentData writeToFile:cachedFilePath
+                     options:NSDataWritingAtomic
+                       error:&error];
+    if (error) {
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+        return nil;        
+    }
+    FBCachedFile* cachedFile = 
+        [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
+    return cachedFile;
+}
+
 
 - (FBCachedFile*)cachedFileForURL:(NSURL*)sourceURL
 {
@@ -172,12 +203,15 @@
 
     NSString* cachedFilePath = [self _cachedFilePathForURL:sourceURL];
     if ([fileManager fileExistsAtPath:cachedFilePath]) {
+        NSDictionary* attributes =
+            [fileManager attributesOfItemAtPath:cachedFilePath error:&error];
+        self.usingSize -= [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+
         if (![fileManager removeItemAtPath:cachedFilePath error:&error]) {
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
         }
     }
     
-    // TODO: update information
 }
 
 - (void)removeAllCachedFiles
@@ -191,8 +225,13 @@
         }
     }
     [self _createDirectoryAtPath:self.path];
-    
-    // TODO: update information
+    self.usingSize = 0;
+}
+
++ (NSString*)defaultPath
+{
+    NSString* path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    return [path stringByAppendingPathComponent:FB_CACHE_PATH];
 }
 
 
