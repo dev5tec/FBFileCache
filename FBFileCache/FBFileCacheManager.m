@@ -6,6 +6,9 @@
 //  Copyright 2011 Five-technology Co.,Ltd.. All rights reserved.
 //
 #import <CommonCrypto/CommonDigest.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fts.h>
 
 #import "FBFileCacheManager.h"
 #import "FBCachedFile.h"
@@ -74,29 +77,28 @@
 
 - (NSUInteger)_calculateUsingSize
 {
-    // TODO: recursive
+    NSUInteger usingSize = 0;
     
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSUInteger totalSize = 0;
+    FTS* fts;
+    FTSENT* entry;
     
-    NSError* error = nil;
-    NSArray* files = [fileManager contentsOfDirectoryAtPath:self.path error:&error];
-    if (error) {
-        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
-        return 0;
-    }
-    for (NSString* file in files) {
-        error =nil;
-        NSDictionary* attributes =
-        [fileManager attributesOfItemAtPath:[self.path stringByAppendingPathComponent:file]
-                                      error:&error];
-        if (error) {
-            NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
-        } else {
-            totalSize += [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+    // fts_open(char* const*, ...)
+    const char* paths[] = { [self.path UTF8String], NULL };
+
+    fts = fts_open(paths, 0, NULL);
+    while ((entry = fts_read(fts))) {
+        if (entry->fts_info & FTS_F) {
+            usingSize += entry->fts_statp->st_size;
         }
     }
-    return totalSize;
+    fts_close(fts);
+
+    return usingSize;
+}
+
+- (NSUInteger)_maxSizeAsKB
+{
+    return self.maxSize * 1024;
 }
 
 
