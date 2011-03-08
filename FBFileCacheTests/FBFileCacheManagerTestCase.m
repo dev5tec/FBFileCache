@@ -17,6 +17,12 @@
 #define TEST_CACHE_URL @"https://www.hoge.hoge.com/some/where/"
 #define TEST_DUMMY_URL @"https://www.dummy.dummy.com/some/where"
 
+// 1024*1024 = 1MB
+#define TEST_LIMIT_SIZE  (1024*1024)
+#define TEST_LIMIT_URL  @"https://www.limitation.com/limit/"
+#define TEST_LIMIT_MAX  6
+
+
 @implementation FBFileCacheManagerTestCase
 
 @synthesize fileCacheManager = fileCacheManager_;
@@ -60,11 +66,12 @@
     [self removeAtPath:[FBFileCacheManager defaultPath]];
 }
 
-- (void)setupTemporary
+- (void)createTemporary
 {
+    NSLog(@"[INFO] Setup Temporary directory...");
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSError* error = nil;
-    NSLog(@"[INFO] Setup Temporary directory...");
+
     [fileManager createDirectoryAtPath:self.temporaryPath
            withIntermediateDirectories:YES
                             attributes:nil
@@ -72,8 +79,15 @@
     if (error) {
         NSLog(@"[ERROR] %@", error);
     }
-    
+}
+- (void)setupTemporary
+{
     NSLog(@"[INFO] Copying images to Temporary directory...");
+
+    [self createTemporary];
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSError* error = nil;
+    
     NSString* originalPath = [[NSBundle bundleForClass:[self class]] resourcePath];
     error = nil;
     int i;
@@ -88,20 +102,15 @@
     }
 }
 
-- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager moveFile:(BOOL)moveFile
+- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager
 {
     int i;
     for (i=0; i < TEST_IMAGE_NUM; i++) {
         NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
         NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forURL:url moveFile:moveFile];
+        [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forURL:url];
     }   
     
-}
-
-- (void)putAllTestFilesWithManager:(FBFileCacheManager*)fileCacheManager
-{
-    [self putAllTestFilesWithManager:fileCacheManager moveFile:NO];
 }
 
 // overwrite old cache files (image-00..09.png) by (image-10..11.png)
@@ -116,6 +125,19 @@
     }   
 }
 
+static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
+- (void)createLimitData
+{
+    [self createTemporary];
+    int i; 
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSString* filePath = [self.temporaryPath stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"DAT-%d", i]];
+        
+        NSData* data = [NSData dataWithBytes:buff length:TEST_LIMIT_SIZE*i];
+        [data writeToFile:filePath atomically:NO];
+    }
+}
 
 - (BOOL)compareFile:(NSString*)path1 withFile:(NSString*)path2
 {
@@ -242,30 +264,6 @@
     }
 }
 
-- (void)testPutAndGetWithMoveFile
-{
-    [self setupTemporary];
-    [self putAllTestFilesWithManager:self.fileCacheManager moveFile:YES];
-
-    NSString* filename = nil;
-    NSURL* url = nil;
-    int i;
-    
-    // test
-    for (i=0; i < TEST_IMAGE_NUM; i++) {
-        filename = [NSString stringWithFormat:@"image-%02d.png", i];
-        url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
-        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
-
-        NSString* temporaryPath = [self.temporaryPath stringByAppendingPathComponent:filename];
-        STAssertTrue(![self fileExistsPath:temporaryPath], @"%@", temporaryPath);
-
-        NSString* originalPath = [[NSBundle bundleForClass:[self class]] resourcePath];
-        STAssertTrue([self compareFile:[originalPath stringByAppendingPathComponent:filename]
-                              withFile:cachedFile.path], @"%@", originalPath);
-    }
-}
-
 - (void)testPutAndGetByUpdating
 {
     [self setupTemporary];
@@ -361,6 +359,128 @@
     STAssertNil(cachedFile, nil);
 }
 
+
+
+// file    file  total  limit
+// name    size  size   10MB  15MB  20MB
+// [DAT-1] 1MB    1MB     x     x     x
+// [DAT-2] 2MB    3MB     x     x     o
+// [DAT-3] 3MB    6MB     x     x     o
+// [DAT-4] 4MB   10MB     x     o     o
+// [DAT-5] 5MB   15MB     x     o     o
+// [DAT-6] 6MB   21MB     o     o     o
+
+// limit test (1) does not over limit
+- (void)testLimit1
+{
+    [self createLimitData];
+    
+    NSURL* baseURL = [NSURL URLWithString:TEST_LIMIT_URL];
+    NSUInteger maxSize = 21;    // 21MB
+    NSUInteger usingSize = 0;
+    self.fileCacheManager.maxSize = maxSize;
+    
+    int i;
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"DAT-%d", i]];
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager putFile:filePath forURL:url];
+    }
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        STAssertNotNil(cachedFile, [url absoluteString]);
+        usingSize += TEST_LIMIT_SIZE*i;
+    }
+    STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+}
+
+// limit test (2)
+- (void)testLimit2
+{
+    [self createLimitData];
+
+    NSURL* baseURL = [NSURL URLWithString:TEST_LIMIT_URL];
+    NSUInteger maxSize = 15;    // 15MB
+    NSUInteger totalSize = 0;
+    NSUInteger usingSize = 0;
+    self.fileCacheManager.maxSize = maxSize;
+    
+    // (2a) new files remain and old files are removed
+    int i;
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"DAT-%d", i]];
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager putFile:filePath forURL:url];
+        [NSThread sleepForTimeInterval:1.0];
+    }
+    for (i=TEST_LIMIT_MAX; i > 0; i--) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        totalSize += i;
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        if (totalSize <= maxSize) {
+            STAssertNotNil(cachedFile, nil);
+            usingSize += TEST_LIMIT_SIZE*i;
+        } else {
+            STAssertNil(cachedFile, nil);
+        }
+    }
+    STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+
+    // (2b) change max size (be less)
+    maxSize = 10;      // 10MB
+    totalSize = 0;
+    usingSize = 0;
+    self.fileCacheManager.maxSize = maxSize;
+
+    for (i=TEST_LIMIT_MAX; i > 0; i--) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        totalSize += i;
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        if (totalSize <= maxSize) {
+            STAssertNotNil(cachedFile, nil);
+            usingSize += TEST_LIMIT_SIZE*i;
+        } else {
+            STAssertNil(cachedFile, nil);
+        }
+    }
+    STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+
+    // (2c) change max size (be more)
+    maxSize = 20;      // 20MB
+    totalSize = 0;
+    usingSize = 0;
+    self.fileCacheManager.maxSize = maxSize;
+
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"DAT-%d", i]];
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager putFile:filePath forURL:url];
+        [NSThread sleepForTimeInterval:1.0];
+    }
+    for (i=TEST_LIMIT_MAX; i > 0; i--) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        totalSize += i;
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        if (totalSize <= maxSize) {
+            STAssertNotNil(cachedFile, nil);
+            usingSize += TEST_LIMIT_SIZE*i;
+        } else {
+            STAssertNil(cachedFile, nil);
+        }
+    }
+    STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+}
 
 //
 // remove

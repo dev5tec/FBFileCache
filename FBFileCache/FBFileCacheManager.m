@@ -15,6 +15,8 @@
 
 #define FB_CACHE_PATH   @"_FBFileCache_"
 
+#define FB_MEGA_BYTE    (1024 * 1024)
+
 @interface FBFileCacheManager()
 @property (nonatomic, copy) NSString* path;
 @property (nonatomic, assign) NSUInteger usingSize;
@@ -96,11 +98,61 @@
     return usingSize;
 }
 
-- (NSUInteger)_maxSizeAsKB
+int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 {
-    return self.maxSize * 1024;
+    __darwin_time_t atime1 = (*a)->fts_statp->st_atimespec.tv_sec;
+    __darwin_time_t atime2 = (*b)->fts_statp->st_atimespec.tv_sec;
+    
+    if (atime1 < atime2) {
+        return -1;
+    } else if (atime1 > atime2) {
+        return 1;
+    } else {
+        return 0;   // equals
+    }
 }
 
+- (BOOL)_makeSpaceForSize:(NSUInteger)fileSize
+{
+    NSUInteger maxByteSize = self.maxSize * FB_MEGA_BYTE;
+    if (maxByteSize < fileSize) {
+        return NO;  // no enough space
+    }
+    
+    NSUInteger spaceSize = maxByteSize - self.usingSize;
+    if (fileSize <= spaceSize) {
+        return YES; // enough space
+    }
+
+    NSUInteger targetSize = maxByteSize - fileSize;
+
+    BOOL result = YES;
+    FTS* fts;
+    FTSENT* entry;
+   
+    // fts_open(char* const*, ...)
+    const char* paths[] = { [self.path UTF8String], NULL };
+    
+    fts = fts_open(paths, 0, _compareWithLastAccessTime);
+    while ((entry = fts_read(fts))) {
+        if (entry->fts_info & FTS_F) {
+//            NSLog(@"#### %u", entry->fts_statp->st_size);
+            
+            if (unlink(entry->fts_path)) {
+                NSLog(@"%s|[ERROR] failed to remove %@", __PRETTY_FUNCTION__, entry->fts_path);
+                result = NO;
+                break;
+            }
+            usingSize_ -= entry->fts_statp->st_size;
+            if (usingSize_ <= targetSize) {
+                break;  // enough space
+            }
+        }
+    }
+    fts_close(fts);
+
+    return result;
+}
 
 #pragma mark -
 #pragma mark Initialization and Deallocation
@@ -130,16 +182,13 @@
 
 - (void)setMaxSize:(NSUInteger)size
 {
-    // TODO: not implementated
+    if (size < maxSize_) {
+        [self _makeSpaceForSize:(maxSize_-size)*FB_MEGA_BYTE];
+    }
     maxSize_ = size;
 }
 
 - (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL
-{
-    return [self putFile:contentFilePath forURL:sourceURL moveFile:NO];
-}
-
-- (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL moveFile:(BOOL)moveFile
 {
     // TODO: checking contentFilePath is a file not a directory
 
@@ -148,34 +197,37 @@
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSError* error = nil;
 
+    // [1] make space for putting the file
+    NSDictionary* attributes = [fileManager attributesOfItemAtPath:contentFilePath error:&error];
+    NSUInteger fileSize = [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+
+    if (![self _makeSpaceForSize:fileSize]) {
+        NSLog(@"%s|[ERROR] There is not enough space for %@ [%u]", __PRETTY_FUNCTION__, sourceURL, fileSize);
+        return nil;
+    }
+
+    // [2] remove old file to overwrite
     if ([fileManager fileExistsAtPath:cachedFilePath]) {
         if (![fileManager removeItemAtPath:cachedFilePath error:&error]) {
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
             return nil;
         }
     }
-    
-    if (moveFile) {
-        [fileManager moveItemAtPath:contentFilePath
-                             toPath:cachedFilePath
-                              error:&error];
-    } else {
-        [fileManager copyItemAtPath:contentFilePath
-                             toPath:cachedFilePath
-                              error:&error];
-    }
 
-    if (error) {
+    // [3] copy the file to cahced file
+    if (![fileManager copyItemAtPath:contentFilePath
+                              toPath:cachedFilePath
+                               error:&error]) {
         NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
         return nil;
     }
 
+    
+    // [4] after follow
+    self.usingSize += fileSize;
+    
     FBCachedFile* cachedFile = 
         [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
-
-    NSDictionary* attributes = [fileManager attributesOfItemAtPath:cachedFilePath error:&error];
-    self.usingSize += [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
-
     return cachedFile;
 }
 
@@ -183,13 +235,26 @@
 {
     NSString* cachedFilePath = [self _cachedFilePathForURL:sourceURL];
     NSError* error = nil;
-    [contentData writeToFile:cachedFilePath
-                     options:NSDataWritingAtomic
-                       error:&error];
-    if (error) {
+    
+    // [1] make space for putting the file
+    NSUInteger fileSize = [contentData length];
+    if (![self _makeSpaceForSize:fileSize]) {
+        NSLog(@"%s|[ERROR] There is not enough space for %@ [%u]", __PRETTY_FUNCTION__, sourceURL, fileSize);
+        return nil;
+    }
+
+    // [2] write data
+    ;
+    if (![contentData writeToFile:cachedFilePath
+                          options:NSDataWritingAtomic
+                            error:&error]) {
         NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
         return nil;        
     }
+    
+    // [3] after follow
+    self.usingSize += fileSize;
+
     FBCachedFile* cachedFile = 
         [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
     return cachedFile;
@@ -218,7 +283,11 @@
     if ([fileManager fileExistsAtPath:cachedFilePath]) {
         NSDictionary* attributes =
             [fileManager attributesOfItemAtPath:cachedFilePath error:&error];
+// TODO
+        // must be positive value !
+        NSLog(@"pre=%u", self.usingSize);
         self.usingSize -= [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+        NSLog(@">> post=%u", self.usingSize);
 
         if (![fileManager removeItemAtPath:cachedFilePath error:&error]) {
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);

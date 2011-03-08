@@ -32,7 +32,6 @@
 
 // Cache Management
 - (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL;
-- (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL moveFile:(BOOL)moveFile;
 - (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL;
 - (FBCachedFile*)cachedFileForURL:(NSURL*)sourceURL;
 
