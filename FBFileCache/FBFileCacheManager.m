@@ -261,7 +261,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 {
     FBCachedFile* cachedFile =
         [FBCachedFile cachedFile:[self _cachedFilePathForURL:sourceURL]];
-    [cachedFile updateAccessTime];
+//    [cachedFile updateAccessTime];
     return cachedFile;
 }
 

@@ -17,6 +17,10 @@
     NSUInteger usingSize_;      // [B]
     
     BOOL includingParameters_;  // default: YES (include URL parameters for the hash key)
+    
+    NSUInteger hitCounter_;
+    NSUInteger fetchCounter_;
+    NSUInteger count_;
 }
 
 #pragma mark -
@@ -25,6 +29,7 @@
 @property (nonatomic, assign) NSUInteger maxSize;
 @property (nonatomic, assign, readonly) NSUInteger usingSize;
 @property (nonatomic, assign) BOOL includingParameters;
+@property (nonatomic, assign, readonly) NSUInteger count;
 
 // Initializing a New Object
 - (id)initWithSize:(NSUInteger)size;

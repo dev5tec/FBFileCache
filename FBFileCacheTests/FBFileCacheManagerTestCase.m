@@ -435,12 +435,14 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
 
     // adjust atime order
+    /*
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager cachedFileForURL:url];
         [NSThread sleepForTimeInterval:1.0];
     }
+     */
 
     // (2b) change max size (be less)
     maxSize = 10;      // 10MB
@@ -462,14 +464,6 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
 
-    // adjust atime order
-    for (i=1; i <= TEST_LIMIT_MAX; i++) {
-        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
-                            relativeToURL:baseURL];
-        [self.fileCacheManager cachedFileForURL:url];
-        [NSThread sleepForTimeInterval:1.0];
-    }
-    
     // (2c) change max size (be more)
     maxSize = 20;      // 20MB
     totalSize = 0;
@@ -498,18 +492,11 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
 
-    // adjust atime order
-    for (i=1; i <= TEST_LIMIT_MAX; i++) {
-        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
-                            relativeToURL:baseURL];
-        [self.fileCacheManager cachedFileForURL:url];
-        [NSThread sleepForTimeInterval:1.0];
-    }
-    
     // (2d) validate atime sorting
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", 2]
                         relativeToURL:baseURL];
-    [self.fileCacheManager cachedFileForURL:url]; // update atime
+    FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+    [cachedFile data];  // update atime (read file)
 
     NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
                           [NSString stringWithFormat:@"DAT-%d", 1]];
