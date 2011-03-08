@@ -20,6 +20,7 @@
 @property (readonly) NSTimeInterval timeIntervalSinceNow;
 @property (readonly) NSData* data;
 
-- (id)initWithFile:(NSString*)filePath;
-
+// API
++ (FBCachedFile*)cachedFile:(NSString*)filePath;
+- (void)updateAccessTime;
 @end

@@ -37,7 +37,6 @@
 		4C2D7F65131DE676000A76E3 /* FBFileCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F64131DE676000A76E3 /* FBFileCacheManager.m */; };
 		4C2D7F67131DE690000A76E3 /* FBCachedFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F57131DC243000A76E3 /* FBCachedFile.m */; };
 		4C2D7F68131DE693000A76E3 /* FBFileCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F64131DE676000A76E3 /* FBFileCacheManager.m */; };
-		4C2D7F6B131DEA20000A76E3 /* FBFileCacheManagerTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F6A131DEA1F000A76E3 /* FBFileCacheManagerTestCase.m */; };
 		4C799BD9131E0ABF00AB4CA7 /* image-09.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BCF131E0ABF00AB4CA7 /* image-09.png */; };
 		4C799BDA131E0ABF00AB4CA7 /* image-08.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BD0131E0ABF00AB4CA7 /* image-08.png */; };
 		4C799BDB131E0ABF00AB4CA7 /* image-07.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BD1131E0ABF00AB4CA7 /* image-07.png */; };
@@ -49,6 +48,7 @@
 		4C799BE1131E0ABF00AB4CA7 /* image-01.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BD7131E0ABF00AB4CA7 /* image-01.png */; };
 		4C799BE4131E146B00AB4CA7 /* image-00.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BE3131E146B00AB4CA7 /* image-00.png */; };
 		4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F5A131DD758000A76E3 /* FBCachedFileTestCase.m */; };
+		4CE0E70F13267765002068A5 /* FBFileCacheManagerTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F6A131DEA1F000A76E3 /* FBFileCacheManagerTestCase.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -390,8 +390,8 @@
 			files = (
 				4C2D7F67131DE690000A76E3 /* FBCachedFile.m in Sources */,
 				4C2D7F68131DE693000A76E3 /* FBFileCacheManager.m in Sources */,
-				4C2D7F6B131DEA20000A76E3 /* FBFileCacheManagerTestCase.m in Sources */,
 				4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */,
+				4CE0E70F13267765002068A5 /* FBFileCacheManagerTestCase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

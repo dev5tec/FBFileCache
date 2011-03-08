@@ -225,10 +225,8 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     
     // [4] after follow
     self.usingSize += fileSize;
+    return [FBCachedFile cachedFile:cachedFilePath];
     
-    FBCachedFile* cachedFile = 
-        [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
-    return cachedFile;
 }
 
 - (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL
@@ -254,23 +252,16 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     
     // [3] after follow
     self.usingSize += fileSize;
+    return [FBCachedFile cachedFile:cachedFilePath];
 
-    FBCachedFile* cachedFile = 
-        [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
-    return cachedFile;
 }
 
 
 - (FBCachedFile*)cachedFileForURL:(NSURL*)sourceURL
 {
-    NSString* cachedFilePath = [self _cachedFilePathForURL:sourceURL];
-
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    FBCachedFile* cachedFile = nil;
-
-    if ([fileManager fileExistsAtPath:cachedFilePath]) {
-        cachedFile = [[[FBCachedFile alloc] initWithFile:cachedFilePath] autorelease];
-    }
+    FBCachedFile* cachedFile =
+        [FBCachedFile cachedFile:[self _cachedFilePathForURL:sourceURL]];
+    [cachedFile updateAccessTime];
     return cachedFile;
 }
 
@@ -285,9 +276,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
             [fileManager attributesOfItemAtPath:cachedFilePath error:&error];
 // TODO
         // must be positive value !
-        NSLog(@"pre=%u", self.usingSize);
         self.usingSize -= [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
-        NSLog(@">> post=%u", self.usingSize);
 
         if (![fileManager removeItemAtPath:cachedFilePath error:&error]) {
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);

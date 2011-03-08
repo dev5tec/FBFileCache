@@ -28,14 +28,35 @@
     return self;
 }
 
+
 - (void)dealloc {
     self.URL = nil;
     [super dealloc];
 }
 
+#pragma mark -
+#pragma mark API
+
+- (void)updateAccessTime
+{
+    FILE* fp = fopen([self.path UTF8String], "r");
+    fgetc(fp);
+    fclose(fp);
+}
+
++ (FBCachedFile*)cachedFile:(NSString*)filePath
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:filePath]) {
+        return [[[self alloc] initWithFile:filePath] autorelease];
+    } else {
+        return nil;
+    }
+}
 
 #pragma mark -
 #pragma mark Properties
+
 - (NSString*)path
 {
     return [self.URL path];

@@ -361,15 +361,6 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 
 
 
-// file    file  total  limit
-// name    size  size   10MB  15MB  20MB
-// [DAT-1] 1MB    1MB     x     x     x
-// [DAT-2] 2MB    3MB     x     x     o
-// [DAT-3] 3MB    6MB     x     x     o
-// [DAT-4] 4MB   10MB     x     o     o
-// [DAT-5] 5MB   15MB     x     o     o
-// [DAT-6] 6MB   21MB     o     o     o
-
 // limit test (1) does not over limit
 - (void)testLimit1
 {
@@ -392,13 +383,23 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
-        STAssertNotNil(cachedFile, [url absoluteString]);
+        STAssertNotNil(cachedFile, [url description]);
         usingSize += TEST_LIMIT_SIZE*i;
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
 }
 
-// limit test (2)
+// limit test (2) over limit and change max size
+//
+// file    file  total  (2a)   (2b)   (2c)   (2d_
+// name    size  size   15MB   10MB   20MB access2,put 1
+// [DAT-1] 1MB    1MB    x      x      x      o
+// [DAT-2] 2MB    3MB    x      x      o      o
+// [DAT-3] 3MB    6MB    x      x      o      x
+// [DAT-4] 4MB   10MB    o      x      o      o
+// [DAT-5] 5MB   15MB    o      x      o      o
+// [DAT-6] 6MB   21MB    o      o      o      o
+
 - (void)testLimit2
 {
     [self createLimitData];
@@ -417,7 +418,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager putFile:filePath forURL:url];
-        [NSThread sleepForTimeInterval:1.0];
+        [NSThread sleepForTimeInterval:1.0];    // delay for atime
     }
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
@@ -432,6 +433,14 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+
+    // adjust atime order
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager cachedFileForURL:url];
+        [NSThread sleepForTimeInterval:1.0];
+    }
 
     // (2b) change max size (be less)
     maxSize = 10;      // 10MB
@@ -445,14 +454,22 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         totalSize += i;
         FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
         if (totalSize <= maxSize) {
-            STAssertNotNil(cachedFile, nil);
+            STAssertNotNil(cachedFile, [url description]);
             usingSize += TEST_LIMIT_SIZE*i;
         } else {
-            STAssertNil(cachedFile, nil);
+            STAssertNil(cachedFile, [url description]);
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
 
+    // adjust atime order
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager cachedFileForURL:url];
+        [NSThread sleepForTimeInterval:1.0];
+    }
+    
     // (2c) change max size (be more)
     maxSize = 20;      // 20MB
     totalSize = 0;
@@ -465,7 +482,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager putFile:filePath forURL:url];
-        [NSThread sleepForTimeInterval:1.0];
+        [NSThread sleepForTimeInterval:1.0];    // delay for atime
     }
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
@@ -480,6 +497,36 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+
+    // adjust atime order
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        [self.fileCacheManager cachedFileForURL:url];
+        [NSThread sleepForTimeInterval:1.0];
+    }
+    
+    // (2d) validate atime sorting
+    NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", 2]
+                        relativeToURL:baseURL];
+    [self.fileCacheManager cachedFileForURL:url]; // update atime
+
+    NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
+                          [NSString stringWithFormat:@"DAT-%d", 1]];
+    url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", 1]
+                        relativeToURL:baseURL];
+    [self.fileCacheManager putFile:filePath forURL:url];
+
+    for (i=1; i <= TEST_LIMIT_MAX; i++) {
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
+                            relativeToURL:baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        if (i == 3) {
+            STAssertNil(cachedFile, [url description]);
+        } else {
+            STAssertNotNil(cachedFile, [url description]);
+        }
+    }
 }
 
 //

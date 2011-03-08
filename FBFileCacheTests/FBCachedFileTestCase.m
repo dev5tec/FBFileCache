@@ -9,6 +9,7 @@
 #import "FBCachedFileTestCase.h"
 
 #import "FBCachedFile.h"
+#include <sys/stat.h>
 
 @implementation FBCachedFileTestCase
 
@@ -46,7 +47,7 @@
 }
 - (FBCachedFile*)sampleCachedFile
 {
-    FBCachedFile* cachedFile = [[[FBCachedFile alloc] initWithFile:[self samplePath]] autorelease];
+    FBCachedFile* cachedFile = [FBCachedFile cachedFile:[self samplePath]];
     return cachedFile;
 }
 
@@ -97,6 +98,23 @@
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSData* data = [NSData dataWithContentsOfFile:cachedFile.path];
     STAssertEqualObjects(cachedFile.data, data, nil);
+}
+
+- (void)testUpdateAccessTime
+{
+    FBCachedFile* cachedFile = [self sampleCachedFile];
+
+    struct stat buf;
+
+    stat([cachedFile.path UTF8String], &buf);
+    __darwin_time_t atime1 = buf.st_atimespec.tv_sec;
+    [NSThread sleepForTimeInterval:1.0];
+
+    [cachedFile updateAccessTime];  // delay for atime
+
+    stat([cachedFile.path UTF8String], &buf);
+    __darwin_time_t atime2 = buf.st_atimespec.tv_sec;
+    STAssertTrue(atime1 < atime2, nil);
 }
 
 @end
