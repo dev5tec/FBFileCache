@@ -358,6 +358,15 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.count, (NSUInteger)2, nil);
 }
 
+- (void)testLargeSize
+{
+    self.fileCacheManager.maxSize = 1;
+    NSData* data = [NSData dataWithBytes:buff length:TEST_LIMIT_SIZE*2];
+    NSURL* url = [NSURL URLWithString:TEST_CACHE_URL];
+    FBCachedFile* cachedFile = [self.fileCacheManager putData:data forURL:url];
+    STAssertNil(cachedFile, nil);
+}
+
 
 - (void)testGetNull
 {
@@ -366,6 +375,23 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertNil(cachedFile, nil);
 }
 
+- (void)testFileExtension
+{
+    [self setupTemporary];
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+
+    int i;
+    for (i=0; i < TEST_IMAGE_NUM; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        
+        NSString* originalPath = [[NSBundle bundleForClass:[self class]] resourcePath];
+        
+        STAssertEqualObjects([cachedFile.path pathExtension],
+                             [[originalPath stringByAppendingPathComponent:filename] pathExtension], nil);
+    }
+}
 
 
 // limit test (1) does not over limit
@@ -428,7 +454,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager putFile:filePath forURL:url];
-        [NSThread sleepForTimeInterval:1.0];    // delay for atime
+        [NSThread sleepForTimeInterval:1.5];    // delay for atime
     }
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
@@ -452,7 +478,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager cachedFileForURL:url];
-        [NSThread sleepForTimeInterval:1.0];
+        [NSThread sleepForTimeInterval:1.5];
     }
      */
 
@@ -492,7 +518,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
         [self.fileCacheManager putFile:filePath forURL:url];
-        [NSThread sleepForTimeInterval:1.0];    // delay for atime
+        [NSThread sleepForTimeInterval:1.5];    // delay for atime
     }
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
@@ -613,5 +639,38 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.usingSize, [self usingSize], nil);
 }
 
+- (void)testCacheHitRate
+{
+    STAssertEquals(self.fileCacheManager.cacheHitRate, 0.0f, nil);
+
+    [self setupTemporary];
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+    
+    int i;
+    for (i=0; i < TEST_IMAGE_NUM*2; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        [self.fileCacheManager cachedFileForURL:url];
+    }
+    STAssertEquals(self.fileCacheManager.cacheHitRate, 0.5f, nil);
+
+    [self.fileCacheManager resetCacheHitRate];
+    STAssertEquals(self.fileCacheManager.cacheHitRate, 0.0f, nil);
+}
+
+
+// test reload
+- (void)testReload
+{
+    [self setupTemporary];
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+    NSUInteger usingSize = self.fileCacheManager.usingSize;
+    NSUInteger count = self.fileCacheManager.count;
+
+    [self.fileCacheManager reload];
+    
+    STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+    STAssertEquals(self.fileCacheManager.count, count, nil);
+}
 
 @end

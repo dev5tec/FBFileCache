@@ -20,6 +20,8 @@
 @interface FBFileCacheManager()
 @property (nonatomic, copy) NSString* path;
 @property (nonatomic, assign) NSUInteger usingSize;
+@property (nonatomic, assign) NSUInteger fetchedCounter;
+@property (nonatomic, assign) NSUInteger hitCounter;
 @property (nonatomic, assign) NSUInteger count;
 @end
 
@@ -31,6 +33,8 @@
 @synthesize usingSize = usingSize_;
 @synthesize includingParameters = includingParameters_;
 @synthesize count = count_;
+@synthesize fetchedCounter = fetchCounter_;
+@synthesize hitCounter = hitCounter_;
 
 #pragma mark -
 #pragma mark Private
@@ -77,27 +81,6 @@
     NSString* filename = [[self _hashStringFromURL:sourceURL]
                           stringByAppendingPathExtension:[sourceURL pathExtension]];
     return [self.path stringByAppendingPathComponent:filename];
-}
-
-- (NSUInteger)_calculateUsingSize
-{
-    NSUInteger usingSize = 0;
-    
-    FTS* fts;
-    FTSENT* entry;
-    
-    // fts_open(char* const*, ...)
-    const char* const paths[] = { [self.path UTF8String], NULL };
-
-    fts = fts_open((char* const*)paths, 0, NULL);
-    while ((entry = fts_read(fts))) {
-        if (entry->fts_info & FTS_F) {
-            usingSize += entry->fts_statp->st_size;
-        }
-    }
-    fts_close(fts);
-
-    return usingSize;
 }
 
 int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
@@ -167,8 +150,8 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 
     // make space
     if (![self _makeSpaceForSize:fileSize]) {
-        NSLog(@"%s|[ERROR] There is not enough space for %@ [%u]",
-              __PRETTY_FUNCTION__, sourceURL, fileSize);
+        NSLog(@"%s|[ERROR] There is not enough space for %@ [%ubytes / maxsize:%u]",
+              __PRETTY_FUNCTION__, sourceURL, fileSize, self.maxSize);
         return nil;
     }
 
@@ -205,8 +188,8 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     if (self && result) {
         self.path = path;
         self.maxSize = size;
-        self.usingSize = [self _calculateUsingSize];
         self.includingParameters = YES;
+        [self reload];
     }
     return self;
 }
@@ -293,6 +276,10 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 {
     FBCachedFile* cachedFile =
         [FBCachedFile cachedFile:[self _cachedFilePathForURL:sourceURL]];
+    self.fetchedCounter++;
+    if (cachedFile) {
+        self.hitCounter++;
+    }
     return cachedFile;
 }
 
@@ -347,6 +334,39 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     return [path stringByAppendingPathComponent:FB_CACHE_PATH];
 }
 
+- (float)cacheHitRate
+{
+    if (self.fetchedCounter) {
+        return (float)self.hitCounter/(float)self.fetchedCounter;
+    } else {
+        return 0.0f;
+    }
+}
 
+- (void)resetCacheHitRate
+{
+    self.hitCounter = 0;
+    self.fetchedCounter = 0;
+}
+
+- (void)reload
+{
+    FTS* fts;
+    FTSENT* entry;
+
+    self.usingSize = 0;
+    self.count = 0;
+    
+    const char* const paths[] = { [self.path UTF8String], NULL };
+    
+    fts = fts_open((char* const*)paths, 0, NULL);
+    while ((entry = fts_read(fts))) {
+        if (entry->fts_info & FTS_F) {
+            self.usingSize += entry->fts_statp->st_size;
+            self.count++;
+        }
+    }
+    fts_close(fts);
+}
 
 @end

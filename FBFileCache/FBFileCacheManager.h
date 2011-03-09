@@ -30,6 +30,7 @@
 @property (nonatomic, assign, readonly) NSUInteger usingSize;
 @property (nonatomic, assign) BOOL includingParameters;
 @property (nonatomic, assign, readonly) NSUInteger count;
+@property (readonly) float cacheHitRate;
 
 // Initializing a New Object
 - (id)initWithSize:(NSUInteger)size;
@@ -45,5 +46,9 @@
 - (void)removeAllCachedFiles;
 
 + (NSString*)defaultPath;
+
+- (void)reload;
+
+- (void)resetCacheHitRate;
 
 @end

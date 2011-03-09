@@ -64,13 +64,13 @@
 - (void)testProperty_Path
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
-    STAssertEqualObjects(cachedFile.path, [self samplePath], @".path does not mache.");
+    STAssertEqualObjects(cachedFile.path, [self samplePath], nil);
 }
 
 - (void)testProperty_URL
 {
     FBCachedFile* cachedFile = [self sampleCachedFile];
-    STAssertEqualObjects(cachedFile.URL, [self sampleURL], @".URL does not mache.");
+    STAssertEqualObjects(cachedFile.URL, [self sampleURL], nil);
 }
 
 - (void)testProperty_CreationDate
@@ -78,13 +78,19 @@
     FBCachedFile* cachedFile = [self sampleCachedFile];
     NSDictionary* attributes = [self attributesOfSample];
     NSDate* creationDate = [attributes objectForKey:NSFileCreationDate];
-    STAssertEqualObjects(cachedFile.creationDate, creationDate, @".creationDate does not mache.");
+    STAssertEqualObjects(cachedFile.creationDate, creationDate, nil);
     
 }
 
-- (void)testProperty_ModificationDate
+- (void)testProperty_lastModifiedDate
 {
-    // TODO
+    FBCachedFile* cachedFile = [self sampleCachedFile];
+    NSLog(@"%@ | %@", cachedFile.creationDate, cachedFile.lastModifiedDate);
+    NSDate* date = [NSDate date];
+    cachedFile.lastModifiedDate = date;
+    STAssertEquals((long)[cachedFile.lastModifiedDate timeIntervalSince1970],
+                   (long)[date timeIntervalSince1970], nil); 
+    
 }
 
 - (void)testProperty_TimeIntervalSinceNow {
@@ -93,8 +99,7 @@
     NSDictionary* attributes = [self attributesOfSample];
     NSDate* creationDate = [attributes objectForKey:NSFileCreationDate];
     STAssertEquals((NSInteger)cachedFile.timeIntervalSinceNow,
-                   (NSInteger)[creationDate timeIntervalSinceNow],
-                   @".timeIntervalSinceNow does not mache.");
+                   (NSInteger)[creationDate timeIntervalSinceNow],nil);
     
 }
 

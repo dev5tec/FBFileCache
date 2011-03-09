@@ -88,11 +88,6 @@
     return [[self _attributes] objectForKey:NSFileCreationDate];
 }
 
-- (NSDate*)modificationDate
-{
-    return [[self _attributes] objectForKey:NSFileModificationDate];
-}
-
 - (NSTimeInterval)timeIntervalSinceNow
 {
     return [self.creationDate timeIntervalSinceNow];
@@ -103,5 +98,21 @@
     return [NSData dataWithContentsOfURL:self.URL];
 }
 
+- (NSDate*)lastModifiedDate
+{
+    return [[self _attributes] objectForKey:NSFileModificationDate];
+}
+
+- (void)setLastModifiedDate:(NSDate*)date
+{
+    NSDictionary* attributes =
+        [NSDictionary dictionaryWithObject:date forKey:NSFileModificationDate];
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSError* error = nil;
+    if (![fileManager setAttributes:attributes
+                       ofItemAtPath:self.path error:&error]) {
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+    }
+}
 
 @end

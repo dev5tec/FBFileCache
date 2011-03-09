@@ -17,11 +17,14 @@
 @property (readonly) NSString* path;
 @property (nonatomic, retain, readonly) NSURL* URL;
 @property (readonly) NSDate* creationDate;
-@property (readonly) NSDate* modificationDate;
 @property (readonly) NSTimeInterval timeIntervalSinceNow;
 @property (readonly) NSData* data;
+
+// optional
+@property (nonatomic, retain) NSDate* lastModifiedDate;
 
 // API
 + (FBCachedFile*)cachedFile:(NSString*)filePath;
 - (void)updateAccessTime;
+
 @end
