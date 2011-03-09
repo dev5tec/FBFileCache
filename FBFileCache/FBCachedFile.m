@@ -55,6 +55,22 @@
 }
 
 #pragma mark -
+#pragma mark Private
+- (NSDictionary*)_attributes
+{
+    NSError* error = nil;
+    NSDictionary* attributes = [[NSFileManager defaultManager]
+                                attributesOfItemAtPath:self.path error:&error];
+    if (error) {
+        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+        return nil;
+    }
+    return attributes;
+}
+
+
+
+#pragma mark -
 #pragma mark Properties
 
 - (NSString*)path
@@ -69,14 +85,12 @@
 
 - (NSDate*)creationDate
 {
-    NSError* error = nil;
-    NSDictionary* attributes = [[NSFileManager defaultManager]
-                                attributesOfItemAtPath:self.path error:&error];
-    if (error) {
-        NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
-        return nil;
-    }
-    return [attributes objectForKey:NSFileCreationDate];
+    return [[self _attributes] objectForKey:NSFileCreationDate];
+}
+
+- (NSDate*)modificationDate
+{
+    return [[self _attributes] objectForKey:NSFileModificationDate];
 }
 
 - (NSTimeInterval)timeIntervalSinceNow

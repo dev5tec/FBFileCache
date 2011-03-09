@@ -110,7 +110,7 @@
         NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
         [fileCacheManager putFile:[self.temporaryPath stringByAppendingPathComponent:filename] forURL:url];
     }   
-    
+    STAssertEquals(fileCacheManager.count, (NSUInteger)TEST_IMAGE_NUM, nil);
 }
 
 // overwrite old cache files (image-00..09.png) by (image-10..11.png)
@@ -269,6 +269,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     [self setupTemporary];
     [self putAllTestFilesWithManager:self.fileCacheManager];
     [self putAllTestFiles2WithManager:self.fileCacheManager];
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)TEST_IMAGE_NUM, nil);
 
     int i;
     for (i=0; i < TEST_IMAGE_NUM; i++) {
@@ -301,6 +302,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 
     FBCachedFile* cachedFile1 = [self.fileCacheManager cachedFileForURL:url];
     STAssertEqualObjects(cachedFile1.data, data1, nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)1, nil);
 
     // 2nd (update)
     NSString* filePath2 = [[NSBundle bundleForClass:[self class]]
@@ -310,9 +312,10 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 
     FBCachedFile* cachedFile2 = [self.fileCacheManager cachedFileForURL:url];
     STAssertEqualObjects(cachedFile2.data, data2, nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)1, nil);
 }
 
-- (void)testPutAndGetWithIncludingParameters
+- (void)testPutAndGetWithIncludingParameters1
 {
     // case1: includingParameters == NO
     self.fileCacheManager.includingParameters = NO;
@@ -330,8 +333,11 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     
     STAssertEqualObjects(cachedFile11.data, data12, nil); // over written
     STAssertEqualObjects(cachedFile12.data, data12, nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)1, nil);
+}
 
-    
+- (void)testPutAndGetWithIncludingParameters2
+{
     // case2: includingParameters == YES;
     self.fileCacheManager.includingParameters = YES;
 
@@ -347,8 +353,9 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     FBCachedFile* cachedFile21 = [self.fileCacheManager putData:data21 forURL:url21];
     FBCachedFile* cachedFile22 = [self.fileCacheManager putData:data22 forURL:url22];
     
-    STAssertEqualObjects(cachedFile21.data, data21, nil); // over written
+    STAssertEqualObjects(cachedFile21.data, data21, nil); // not over written
     STAssertEqualObjects(cachedFile22.data, data22, nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)2, nil);
 }
 
 
@@ -379,6 +386,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
                             relativeToURL:baseURL];
         [self.fileCacheManager putFile:filePath forURL:url];
     }
+    
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
@@ -387,6 +395,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         usingSize += TEST_LIMIT_SIZE*i;
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)TEST_LIMIT_MAX, nil);
 }
 
 // limit test (2) over limit and change max size
@@ -408,6 +417,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     NSUInteger maxSize = 15;    // 15MB
     NSUInteger totalSize = 0;
     NSUInteger usingSize = 0;
+    NSUInteger count = 0;
     self.fileCacheManager.maxSize = maxSize;
     
     // (2a) new files remain and old files are removed
@@ -428,11 +438,13 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         if (totalSize <= maxSize) {
             STAssertNotNil(cachedFile, nil);
             usingSize += TEST_LIMIT_SIZE*i;
+            count++;
         } else {
             STAssertNil(cachedFile, nil);
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+    STAssertEquals(self.fileCacheManager.count, count, nil);
 
     // adjust atime order
     /*
@@ -448,6 +460,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     maxSize = 10;      // 10MB
     totalSize = 0;
     usingSize = 0;
+    count = 0;
     self.fileCacheManager.maxSize = maxSize;
 
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
@@ -458,16 +471,19 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         if (totalSize <= maxSize) {
             STAssertNotNil(cachedFile, [url description]);
             usingSize += TEST_LIMIT_SIZE*i;
+            count++;
         } else {
             STAssertNil(cachedFile, [url description]);
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+    STAssertEquals(self.fileCacheManager.count, count, nil);
 
     // (2c) change max size (be more)
     maxSize = 20;      // 20MB
     totalSize = 0;
     usingSize = 0;
+    count = 0;
     self.fileCacheManager.maxSize = maxSize;
 
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
@@ -486,13 +502,16 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         if (totalSize <= maxSize) {
             STAssertNotNil(cachedFile, nil);
             usingSize += TEST_LIMIT_SIZE*i;
+            count++;
         } else {
             STAssertNil(cachedFile, nil);
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
+    STAssertEquals(self.fileCacheManager.count, count, nil);
 
     // (2d) validate atime sorting
+    count = 0;
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", 2]
                         relativeToURL:baseURL];
     FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
@@ -512,8 +531,10 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
             STAssertNil(cachedFile, [url description]);
         } else {
             STAssertNotNil(cachedFile, [url description]);
+            count++;
         }
     }
+    STAssertEquals(self.fileCacheManager.count, count, nil);
 }
 
 //
@@ -553,6 +574,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 
     // (4) check size after removing
     STAssertEquals(self.fileCacheManager.usingSize, [self usingSize], nil);
+    STAssertEquals(self.fileCacheManager.count, (NSUInteger)(TEST_IMAGE_NUM/2), nil);
 }
 
 - (void)testRemoveAll
@@ -574,8 +596,9 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         NSLog(@"[ERROR] %@", error);
     }
     STAssertNotNil(files, nil);
-    STAssertTrue([files count] == 0, @"%@", files);
+    STAssertEquals([files count], (NSUInteger)0, @"%@", files);
     STAssertTrue(self.fileCacheManager.usingSize == 0, @"%@", files);
+    STAssertEquals(self.fileCacheManager.count,(NSUInteger)0, nil);
 }
 
 

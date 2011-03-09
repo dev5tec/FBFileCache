@@ -82,6 +82,11 @@
     
 }
 
+- (void)testProperty_ModificationDate
+{
+    // TODO
+}
+
 - (void)testProperty_TimeIntervalSinceNow {
 
     FBCachedFile* cachedFile = [self sampleCachedFile];
