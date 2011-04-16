@@ -49,6 +49,8 @@
 		4C799BE4131E146B00AB4CA7 /* image-00.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C799BE3131E146B00AB4CA7 /* image-00.png */; };
 		4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F5A131DD758000A76E3 /* FBCachedFileTestCase.m */; };
 		4CE0E70F13267765002068A5 /* FBFileCacheManagerTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F6A131DEA1F000A76E3 /* FBFileCacheManagerTestCase.m */; };
+		4CEB760113557B5B00329EF5 /* FBLockManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CEB760013557B5B00329EF5 /* FBLockManager.m */; };
+		4CEB760213557B5B00329EF5 /* FBLockManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CEB760013557B5B00329EF5 /* FBLockManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +112,8 @@
 		4C799BD6131E0ABF00AB4CA7 /* image-02.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "image-02.png"; sourceTree = "<group>"; };
 		4C799BD7131E0ABF00AB4CA7 /* image-01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "image-01.png"; sourceTree = "<group>"; };
 		4C799BE3131E146B00AB4CA7 /* image-00.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "image-00.png"; sourceTree = "<group>"; };
+		4CEB75FF13557B5B00329EF5 /* FBLockManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBLockManager.h; sourceTree = "<group>"; };
+		4CEB760013557B5B00329EF5 /* FBLockManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBLockManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,6 +248,8 @@
 				4C2D7F57131DC243000A76E3 /* FBCachedFile.m */,
 				4C2D7F63131DE676000A76E3 /* FBFileCacheManager.h */,
 				4C2D7F64131DE676000A76E3 /* FBFileCacheManager.m */,
+				4CEB75FF13557B5B00329EF5 /* FBLockManager.h */,
+				4CEB760013557B5B00329EF5 /* FBLockManager.m */,
 			);
 			path = FBFileCache;
 			sourceTree = "<group>";
@@ -381,6 +387,7 @@
 				4C094BD8131DB5480019ACAF /* RootViewController.m in Sources */,
 				4C2D7F58131DC243000A76E3 /* FBCachedFile.m in Sources */,
 				4C2D7F65131DE676000A76E3 /* FBFileCacheManager.m in Sources */,
+				4CEB760113557B5B00329EF5 /* FBLockManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +399,7 @@
 				4C2D7F68131DE693000A76E3 /* FBFileCacheManager.m in Sources */,
 				4CE0E63D1320D687002068A5 /* FBCachedFileTestCase.m in Sources */,
 				4CE0E70F13267765002068A5 /* FBFileCacheManagerTestCase.m in Sources */,
+				4CEB760213557B5B00329EF5 /* FBLockManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

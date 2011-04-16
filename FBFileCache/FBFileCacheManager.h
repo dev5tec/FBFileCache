@@ -8,12 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+#define FBFileCachManager_VERSION   @"0.90"
+
 @class FBCachedFile;
+@class FBLockManager;
 
 @interface FBFileCacheManager : NSObject {
  
     NSString* path_;
-    NSUInteger maxSize_;        // [MB]
+    NSUInteger size_;        // [MB]
     NSUInteger usingSize_;      // [B]
     
     BOOL includingParameters_;  // default: YES (include URL parameters for the hash key)
@@ -21,16 +24,20 @@
     NSUInteger hitCounter_;
     NSUInteger fetchCounter_;
     NSUInteger count_;
+    
+    FBLockManager* lockManager_;
 }
 
 #pragma mark -
 #pragma mark Properties
+
 @property (nonatomic, copy, readonly) NSString* path;
-@property (nonatomic, assign) NSUInteger maxSize;
-@property (nonatomic, assign, readonly) NSUInteger usingSize;
-@property (nonatomic, assign) BOOL includingParameters;
-@property (nonatomic, assign, readonly) NSUInteger count;
-@property (readonly) float cacheHitRate;
+@property (assign, readonly) float cacheHitRate;
+@property (assign, readonly) NSUInteger usingSize;
+@property (assign, readonly) NSUInteger count;
+@property (assign, readonly) NSUInteger size;
+@property (assign) BOOL includingParameters;
+
 
 // Initializing a New Object
 - (id)initWithSize:(NSUInteger)size;
@@ -41,7 +48,6 @@
 - (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL;
 - (FBCachedFile*)cachedFileForURL:(NSURL*)sourceURL;
 
-
 - (void)removeCachedFileForURL:(NSURL*)sourceURL;
 - (void)removeAllCachedFiles;
 
@@ -50,5 +56,7 @@
 - (void)reload;
 
 - (void)resetCacheHitRate;
+- (void)resizeTo:(NSUInteger)size;
++ (NSString*)version;
 
 @end

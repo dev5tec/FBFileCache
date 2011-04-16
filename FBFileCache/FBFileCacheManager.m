@@ -12,6 +12,7 @@
 
 #import "FBFileCacheManager.h"
 #import "FBCachedFile.h"
+#import "FBLockManager.h"
 
 #define FB_CACHE_PATH   @"_FBFileCache_"
 
@@ -19,22 +20,28 @@
 
 @interface FBFileCacheManager()
 @property (nonatomic, copy) NSString* path;
-@property (nonatomic, assign) NSUInteger usingSize;
-@property (nonatomic, assign) NSUInteger fetchedCounter;
-@property (nonatomic, assign) NSUInteger hitCounter;
-@property (nonatomic, assign) NSUInteger count;
+@property (assign) NSUInteger fetchedCounter;
+@property (assign) NSUInteger hitCounter;
+
+@property (assign) NSUInteger usingSize;
+@property (assign) NSUInteger count;
+
+@property (nonatomic, retain) FBLockManager* lockManager;
+
 @end
 
 
 @implementation FBFileCacheManager
 
 @synthesize path = path_;
-@synthesize maxSize = maxSize_;
+@synthesize size = size_;
 @synthesize usingSize = usingSize_;
 @synthesize includingParameters = includingParameters_;
 @synthesize count = count_;
 @synthesize fetchedCounter = fetchCounter_;
 @synthesize hitCounter = hitCounter_;
+
+@synthesize lockManager = lockManager_;
 
 #pragma mark -
 #pragma mark Private
@@ -99,7 +106,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 
 - (BOOL)_makeSpaceForSize:(NSUInteger)fileSize
 {
-    NSUInteger maxByteSize = self.maxSize * FB_MEGA_BYTE;
+    NSUInteger maxByteSize = self.size * FB_MEGA_BYTE;
     if (maxByteSize < fileSize) {
         return NO;  // no enough space
     }
@@ -109,19 +116,17 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
         return YES; // enough space
     }
 
-    NSUInteger targetSize = maxByteSize - fileSize;
-
     BOOL result = YES;
     FTS* fts;
     FTSENT* entry;
-   
-    // fts_open(char* const*, ...)
     const char* paths[] = { [self.path UTF8String], NULL };
+    
+    NSUInteger decreaseOfSize = 0;
     
     fts = fts_open((char* const*)paths, 0, _compareWithLastAccessTime);
     while ((entry = fts_read(fts))) {
         if (entry->fts_info & FTS_F) {
-//            NSLog(@"#### %u", entry->fts_statp->st_size);
+//            NSLog(@"#### %u", entry->fts_statp->st_size); // DEBUG
             
             if (unlink(entry->fts_path)) {
                 NSLog(@"%s|[ERROR] failed to remove %@",
@@ -131,16 +136,18 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
             } else {
                 self.count--;
             }
-            usingSize_ -= entry->fts_statp->st_size;
-            if (usingSize_ <= targetSize) {
+            decreaseOfSize += entry->fts_statp->st_size;
+            if (fileSize <= decreaseOfSize) {
                 break;  // enough space
-            }
-        }
+            }        }
     }
     fts_close(fts);
 
+    self.usingSize -= decreaseOfSize;
+
     return result;
 }
+
 
 - (FBCachedFile*)_putForResourceURL:(NSURL*)sourceURL size:(NSUInteger)fileSize block:(BOOL(^)(NSString* cachedFilePath))block
 {
@@ -151,7 +158,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     // make space
     if (![self _makeSpaceForSize:fileSize]) {
         NSLog(@"%s|[ERROR] There is not enough space for %@ [%ubytes / maxsize:%u]",
-              __PRETTY_FUNCTION__, sourceURL, fileSize, self.maxSize);
+              __PRETTY_FUNCTION__, sourceURL, fileSize, self.size);
         return nil;
     }
 
@@ -187,7 +194,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     BOOL result = [self _createDirectoryAtPath:path];
     if (self && result) {
         self.path = path;
-        self.maxSize = size;
+        [self resizeTo:size];
         self.includingParameters = YES;
         [self reload];
     }
@@ -204,12 +211,22 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
 #pragma mark -
 #pragma mark Properties
 
-- (void)setMaxSize:(NSUInteger)size
+- (void)resizeTo:(NSUInteger)size
 {
-    if (size < maxSize_) {
-        [self _makeSpaceForSize:(maxSize_-size)*FB_MEGA_BYTE];
+    if (size < size_) {
+
+        [self.lockManager lock];
+        //
+        // start critical secion (whole) -->
+        //
+        [self _makeSpaceForSize:(size_-size)*FB_MEGA_BYTE];
+        //
+        // <-- critical secion (whole)
+        //
+        [self.lockManager unlock];
+
     }
-    maxSize_ = size;
+    size_ = size;
 }
 
 - (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL
@@ -232,10 +249,15 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
         return nil;
     }
 
+
+    [self.lockManager lockForURL:sourceURL];
+    //
+    // start critical section -->
+    //
+    
     FBCachedFile* cachedFile =
         [self _putForResourceURL:sourceURL size:fileStat.st_size
         block:^BOOL(NSString* cachedFilePath) {
-            // [3] copy the file to cahced file
             NSFileManager* fileManager = [NSFileManager defaultManager];
             NSError* error = nil;
             if ([fileManager copyItemAtPath:contentFilePath
@@ -247,12 +269,22 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
                 return NO;
             }            
         }];
-    return cachedFile;    
+    
+    //
+    // <-- end critical section
+    //
+    [self.lockManager unlockForURL:(NSURL*)sourceURL];
 
+    return cachedFile;    
 }
 
 - (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL
 {
+    [self.lockManager lockForURL:sourceURL];
+    //
+    // start critical section -->
+    //
+
     NSUInteger fileSize = [contentData length];    
     FBCachedFile* cachedFile = [self _putForResourceURL:sourceURL size:fileSize
           block:^BOOL(NSString* cachedFilePath) {
@@ -267,8 +299,13 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
                   return NO;
               }            
           }];
-    return cachedFile;    
+    
+    //
+    // <-- end critical section
+    //
+    [self.lockManager unlockForURL:(NSURL*)sourceURL];
 
+    return cachedFile;
 }
 
 
@@ -283,8 +320,16 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     return cachedFile;
 }
 
+//
+// <<locking>>
+// mutex: [sourceURL absoluteString]  **not sourceURL only
+//
 - (void)removeCachedFileForURL:(NSURL*)sourceURL
 {
+    [self.lockManager lockForURL:sourceURL];
+    //
+    // start critical section -->
+    //
 
     NSString* cachedFilePath = [self _cachedFilePathForURL:sourceURL];
 
@@ -309,7 +354,11 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
         }
     }
-    
+ 
+    //
+    // <-- end critical section
+    //
+    [self.lockManager unlockForURL:(NSURL*)sourceURL];
 }
 
 - (void)removeAllCachedFiles
@@ -318,6 +367,12 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     NSError* error = nil;
     
     if ([fileManager fileExistsAtPath:self.path]) {
+        
+        [self.lockManager lock];
+        //
+        // start critical secion (whole) -->
+        //
+        
         if ([fileManager removeItemAtPath:self.path error:&error]) {
             [self _createDirectoryAtPath:self.path];
             self.usingSize = 0;
@@ -325,6 +380,10 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
         } else {
             NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
         }
+        //
+        // <-- end critical section (whole)
+        //
+        [self.lockManager unlock];
     }
 }
 
@@ -354,19 +413,29 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     FTS* fts;
     FTSENT* entry;
 
-    self.usingSize = 0;
-    self.count = 0;
-    
+    NSUInteger usingSize = 0;
+    NSUInteger count = 0;
+
     const char* const paths[] = { [self.path UTF8String], NULL };
-    
-    fts = fts_open((char* const*)paths, 0, NULL);
-    while ((entry = fts_read(fts))) {
-        if (entry->fts_info & FTS_F) {
-            self.usingSize += entry->fts_statp->st_size;
-            self.count++;
+
+    @synchronized (self) {
+        fts = fts_open((char* const*)paths, 0, NULL);
+        while ((entry = fts_read(fts))) {
+            if (entry->fts_info & FTS_F) {
+                usingSize += entry->fts_statp->st_size;
+                count++;
+            }
         }
+        fts_close(fts);
+        
+        self.usingSize = usingSize;
+        self.count = count;
     }
-    fts_close(fts);
+}
+
++ (NSString*)version
+{
+    return FBFileCachManager_VERSION;
 }
 
 @end
