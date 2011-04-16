@@ -115,7 +115,6 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     if (fileSize <= spaceSize) {
         return YES; // enough space
     }
-
     BOOL result = YES;
     FTS* fts;
     FTSENT* entry;
@@ -126,7 +125,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
     fts = fts_open((char* const*)paths, 0, _compareWithLastAccessTime);
     while ((entry = fts_read(fts))) {
         if (entry->fts_info & FTS_F) {
-//            NSLog(@"#### %u", entry->fts_statp->st_size); // DEBUG
+//            NSLog(@"#### %s, %u", entry->fts_path, entry->fts_statp->st_size); // DEBUG
             
             if (unlink(entry->fts_path)) {
                 NSLog(@"%s|[ERROR] failed to remove %@",
@@ -137,9 +136,10 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
                 self.count--;
             }
             decreaseOfSize += entry->fts_statp->st_size;
-            if (fileSize <= decreaseOfSize) {
+            if (fileSize <= (decreaseOfSize + spaceSize)) {
                 break;  // enough space
-            }        }
+            }   
+        }
     }
     fts_close(fts);
 

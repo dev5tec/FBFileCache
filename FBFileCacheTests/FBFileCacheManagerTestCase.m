@@ -507,6 +507,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.count, count, nil);
 
     // (2c) change max size (be more)
+
     maxSize = 20;      // 20MB
     totalSize = 0;
     usingSize = 0;
@@ -518,6 +519,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
                               [NSString stringWithFormat:@"DAT-%d", i]];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
+
         [self.fileCacheManager putFile:filePath forURL:url];
         [NSThread sleepForTimeInterval:1.5];    // delay for atime
     }
