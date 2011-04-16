@@ -47,16 +47,16 @@
 - (FBCachedFile*)putFile:(NSString*)contentFilePath forURL:(NSURL*)sourceURL;
 - (FBCachedFile*)putData:(NSData*)contentData forURL:(NSURL*)sourceURL;
 - (FBCachedFile*)cachedFileForURL:(NSURL*)sourceURL;
-
 - (void)removeCachedFileForURL:(NSURL*)sourceURL;
 - (void)removeAllCachedFiles;
-
-+ (NSString*)defaultPath;
-
 - (void)reload;
-
-- (void)resetCacheHitRate;
 - (void)resizeTo:(NSUInteger)size;
+
+// Cache Information
+- (void)resetCacheHitRate;
+
+// Etc
++ (NSString*)defaultPath;
 + (NSString*)version;
 
 @end
