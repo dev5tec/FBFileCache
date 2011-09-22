@@ -218,7 +218,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 - (void)testInitWithPathSize
 {
     STAssertEqualObjects(self.fileCacheManager.path, [self cachePath], nil);
-    STAssertEquals((NSUInteger)self.fileCacheManager.maxSize, (NSUInteger)100, nil);    
+    STAssertEquals((NSUInteger)self.fileCacheManager.size, (NSUInteger)100, nil);    
 }
 
 - (void)testInitWithSize
@@ -226,7 +226,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     self.fileCacheManager = [[FBFileCacheManager alloc] initWithSize:100];
 
     STAssertEqualObjects(self.fileCacheManager.path, [FBFileCacheManager defaultPath], nil);
-    STAssertEquals((NSUInteger)self.fileCacheManager.maxSize, (NSUInteger)100, nil);        
+    STAssertEquals((NSUInteger)self.fileCacheManager.size, (NSUInteger)100, nil);        
 }
 
 - (void)testInitWhenResume
@@ -238,7 +238,6 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
                                     initWithPath:[self cachePath] size:100];
     STAssertEquals(manager2.usingSize, [self usingSize], nil);
 }
-
 
 //
 // put
@@ -360,7 +359,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
 
 - (void)testLargeSize
 {
-    self.fileCacheManager.maxSize = 1;
+    [self.fileCacheManager resizeTo:1];
     NSData* data = [NSData dataWithBytes:buff length:TEST_LIMIT_SIZE*2];
     NSURL* url = [NSURL URLWithString:TEST_CACHE_URL];
     FBCachedFile* cachedFile = [self.fileCacheManager putData:data forURL:url];
@@ -402,7 +401,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     NSURL* baseURL = [NSURL URLWithString:TEST_LIMIT_URL];
     NSUInteger maxSize = 21;    // 21MB
     NSUInteger usingSize = 0;
-    self.fileCacheManager.maxSize = maxSize;
+    [self.fileCacheManager resizeTo:maxSize];
     
     int i;
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
@@ -444,8 +443,8 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     NSUInteger totalSize = 0;
     NSUInteger usingSize = 0;
     NSUInteger count = 0;
-    self.fileCacheManager.maxSize = maxSize;
-    
+    [self.fileCacheManager resizeTo:maxSize];
+
     // (2a) new files remain and old files are removed
     int i;
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
@@ -462,11 +461,11 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         totalSize += i;
         FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
         if (totalSize <= maxSize) {
-            STAssertNotNil(cachedFile, nil);
+            STAssertNotNil(cachedFile, [url description]);
             usingSize += TEST_LIMIT_SIZE*i;
             count++;
         } else {
-            STAssertNil(cachedFile, nil);
+            STAssertNil(cachedFile, [url description]);
         }
     }
     STAssertEquals(self.fileCacheManager.usingSize, usingSize, nil);
@@ -487,7 +486,8 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     totalSize = 0;
     usingSize = 0;
     count = 0;
-    self.fileCacheManager.maxSize = maxSize;
+    [self.fileCacheManager resizeTo:maxSize];
+
 
     for (i=TEST_LIMIT_MAX; i > 0; i--) {
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
@@ -506,17 +506,19 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.count, count, nil);
 
     // (2c) change max size (be more)
+
     maxSize = 20;      // 20MB
     totalSize = 0;
     usingSize = 0;
     count = 0;
-    self.fileCacheManager.maxSize = maxSize;
+    [self.fileCacheManager resizeTo:maxSize];
 
     for (i=1; i <= TEST_LIMIT_MAX; i++) {
         NSString* filePath = [[self temporaryPath] stringByAppendingPathComponent:
                               [NSString stringWithFormat:@"DAT-%d", i]];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"DAT-%d", i]
                             relativeToURL:baseURL];
+
         [self.fileCacheManager putFile:filePath forURL:url];
         [NSThread sleepForTimeInterval:1.5];    // delay for atime
     }
@@ -526,7 +528,7 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
         totalSize += i;
         FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
         if (totalSize <= maxSize) {
-            STAssertNotNil(cachedFile, nil);
+            STAssertNotNil(cachedFile, [url description]);
             usingSize += TEST_LIMIT_SIZE*i;
             count++;
         } else {
@@ -658,8 +660,44 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.cacheHitRate, 0.0f, nil);
 }
 
+- (void)testFileProtectionEnabled
+{
+    // setup files
+    [self setupTemporary];
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+    
+    for (int i=0; i < TEST_IMAGE_NUM; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        NSError* error = nil;
+        NSDictionary* attributes = [[NSFileManager defaultManager]
+                                    attributesOfItemAtPath:cachedFile.path
+                                    error:&error];
+        NSLog(@"%@", attributes);
+        STAssertEquals([attributes objectForKey:NSFileProtectionKey], NSFileProtectionNone, nil);
+    }
 
+    self.fileCacheManager.fileProtectionEnabled = YES;
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+
+    for (int i=0; i < TEST_IMAGE_NUM; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        NSError* error = nil;
+        NSDictionary* attributes = [[NSFileManager defaultManager]
+                                    attributesOfItemAtPath:cachedFile.path
+                                    error:&error];
+        STAssertEquals([attributes objectForKey:NSFileProtectionKey], NSFileProtectionComplete, nil);
+    }
+}
+
+
+
+//
 // test reload
+//
 - (void)testReload
 {
     [self setupTemporary];

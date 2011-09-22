@@ -9,10 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface FBCachedFile : NSObject {
-    
-    NSURL* url_;
-}
+@interface FBCachedFile : NSObject
 
 @property (readonly) NSString* path;
 @property (nonatomic, retain, readonly) NSURL* URL;
