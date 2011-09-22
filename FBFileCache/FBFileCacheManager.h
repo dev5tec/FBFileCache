@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define FBFileCachManager_VERSION   @"0.90"
+#define FBFileCachManager_VERSION   @"1.00"
 
 @class FBCachedFile;
 @class FBLockManager;
@@ -26,6 +26,8 @@
     NSUInteger count_;
     
     FBLockManager* lockManager_;
+    
+    BOOL fileProtectionEnabled_;
 }
 
 #pragma mark -
@@ -37,7 +39,7 @@
 @property (assign, readonly) NSUInteger count;
 @property (assign, readonly) NSUInteger size;
 @property (assign) BOOL includingParameters;
-
+@property (assign) BOOL fileProtectionEnabled;
 
 // Initializing a New Object
 - (id)initWithSize:(NSUInteger)size;

@@ -51,6 +51,7 @@
 		4CE0E70F13267765002068A5 /* FBFileCacheManagerTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C2D7F6A131DEA1F000A76E3 /* FBFileCacheManagerTestCase.m */; };
 		4CEB760113557B5B00329EF5 /* FBLockManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CEB760013557B5B00329EF5 /* FBLockManager.m */; };
 		4CEB760213557B5B00329EF5 /* FBLockManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CEB760013557B5B00329EF5 /* FBLockManager.m */; };
+		4CEB7632135BAC7300329EF5 /* TODO.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 4CEB7631135BAC7300329EF5 /* TODO.rtf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +93,18 @@
 		4C094BE9131DB5480019ACAF /* FBFileCacheTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FBFileCacheTests-Info.plist"; sourceTree = "<group>"; };
 		4C094BEB131DB5480019ACAF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4C094BED131DB5480019ACAF /* FBFileCacheTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FBFileCacheTests-Prefix.pch"; sourceTree = "<group>"; };
+		4C1B1B88142B12B9005E0EE1 /* IMG_0384.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0384.JPG; sourceTree = "<group>"; };
+		4C1B1B89142B12B9005E0EE1 /* IMG_0488.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0488.JPG; sourceTree = "<group>"; };
+		4C1B1B8A142B12B9005E0EE1 /* IMG_0766.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0766.JPG; sourceTree = "<group>"; };
+		4C1B1B8B142B12B9005E0EE1 /* IMG_0854.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0854.JPG; sourceTree = "<group>"; };
+		4C1B1B8C142B12B9005E0EE1 /* IMG_0873.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0873.JPG; sourceTree = "<group>"; };
+		4C1B1B8D142B12B9005E0EE1 /* IMG_0944.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_0944.JPG; sourceTree = "<group>"; };
+		4C1B1B8E142B12B9005E0EE1 /* IMG_1017.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_1017.JPG; sourceTree = "<group>"; };
+		4C1B1B8F142B12B9005E0EE1 /* IMG_1114.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_1114.JPG; sourceTree = "<group>"; };
+		4C1B1B90142B12B9005E0EE1 /* IMG_1167.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_1167.JPG; sourceTree = "<group>"; };
+		4C1B1B91142B12B9005E0EE1 /* IMG_1197.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_1197.JPG; sourceTree = "<group>"; };
+		4C1B1B92142B12B9005E0EE1 /* IMG_1201.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_1201.JPG; sourceTree = "<group>"; };
+		4C1B1B93142B12B9005E0EE1 /* list.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = list.txt; sourceTree = "<group>"; };
 		4C2D7F56131DC243000A76E3 /* FBCachedFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBCachedFile.h; sourceTree = "<group>"; };
 		4C2D7F57131DC243000A76E3 /* FBCachedFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBCachedFile.m; sourceTree = "<group>"; };
 		4C2D7F59131DD758000A76E3 /* FBCachedFileTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBCachedFileTestCase.h; sourceTree = "<group>"; };
@@ -114,6 +127,7 @@
 		4C799BE3131E146B00AB4CA7 /* image-00.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "image-00.png"; sourceTree = "<group>"; };
 		4CEB75FF13557B5B00329EF5 /* FBLockManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBLockManager.h; sourceTree = "<group>"; };
 		4CEB760013557B5B00329EF5 /* FBLockManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBLockManager.m; sourceTree = "<group>"; };
+		4CEB7631135BAC7300329EF5 /* TODO.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = TODO.rtf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +159,8 @@
 		4C094BB2131DB5480019ACAF = {
 			isa = PBXGroup;
 			children = (
+				4CEB7631135BAC7300329EF5 /* TODO.rtf */,
+				4C1B1B87142B12B9005E0EE1 /* Sample Images */,
 				4C2D7F53131DC19F000A76E3 /* FBFileCache */,
 				4C094BC7131DB5480019ACAF /* Sample Application */,
 				4C094BE7131DB5480019ACAF /* FBFileCacheTests */,
@@ -241,6 +257,26 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		4C1B1B87142B12B9005E0EE1 /* Sample Images */ = {
+			isa = PBXGroup;
+			children = (
+				4C1B1B88142B12B9005E0EE1 /* IMG_0384.JPG */,
+				4C1B1B89142B12B9005E0EE1 /* IMG_0488.JPG */,
+				4C1B1B8A142B12B9005E0EE1 /* IMG_0766.JPG */,
+				4C1B1B8B142B12B9005E0EE1 /* IMG_0854.JPG */,
+				4C1B1B8C142B12B9005E0EE1 /* IMG_0873.JPG */,
+				4C1B1B8D142B12B9005E0EE1 /* IMG_0944.JPG */,
+				4C1B1B8E142B12B9005E0EE1 /* IMG_1017.JPG */,
+				4C1B1B8F142B12B9005E0EE1 /* IMG_1114.JPG */,
+				4C1B1B90142B12B9005E0EE1 /* IMG_1167.JPG */,
+				4C1B1B91142B12B9005E0EE1 /* IMG_1197.JPG */,
+				4C1B1B92142B12B9005E0EE1 /* IMG_1201.JPG */,
+				4C1B1B93142B12B9005E0EE1 /* list.txt */,
+			);
+			name = "Sample Images";
+			path = "Sample Application/Images";
+			sourceTree = "<group>";
+		};
 		4C2D7F53131DC19F000A76E3 /* FBFileCache */ = {
 			isa = PBXGroup;
 			children = (
@@ -327,6 +363,7 @@
 				4C094BCC131DB5480019ACAF /* InfoPlist.strings in Resources */,
 				4C094BD5131DB5480019ACAF /* MainWindow.xib in Resources */,
 				4C094BDB131DB5480019ACAF /* RootViewController.xib in Resources */,
+				4CEB7632135BAC7300329EF5 /* TODO.rtf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

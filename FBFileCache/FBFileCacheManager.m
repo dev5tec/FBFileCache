@@ -43,6 +43,8 @@
 
 @synthesize lockManager = lockManager_;
 
+@synthesize fileProtectionEnabled = fileProtectionEnabled_;
+
 #pragma mark -
 #pragma mark Private
 - (NSString*)_hashStringFromURL:(NSURL*)url
@@ -196,6 +198,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
         self.path = path;
         [self resizeTo:size];
         self.includingParameters = YES;
+        self.fileProtectionEnabled = NO;
         [self reload];
     }
     return self;
@@ -260,14 +263,24 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
         block:^BOOL(NSString* cachedFilePath) {
             NSFileManager* fileManager = [NSFileManager defaultManager];
             NSError* error = nil;
-            if ([fileManager copyItemAtPath:contentFilePath
+            if (![fileManager copyItemAtPath:contentFilePath
                                      toPath:cachedFilePath
                                       error:&error]) {
-                return YES;
-            } else {
                 NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
                 return NO;
-            }            
+            }
+            if (self.fileProtectionEnabled) {
+                NSDictionary* attributes =
+                    [NSDictionary dictionaryWithObject:NSFileProtectionComplete
+                                                forKey:NSFileProtectionKey];
+                if (![fileManager setAttributes:attributes
+                                  ofItemAtPath:cachedFilePath
+                                         error:&error]) {
+                    NSLog(@"%s|[ERROR] %@", __PRETTY_FUNCTION__, error);
+                    return NO;
+                }
+            }
+            return YES;
         }];
     
     //
@@ -291,7 +304,7 @@ int _compareWithLastAccessTime(const FTSENT **a, const FTSENT **b)
               // [3] copy the file to cahced file
               NSError* error = nil;
               if ([contentData writeToFile:cachedFilePath
-                                   options:NSDataWritingAtomic
+                                   options:NSDataWritingAtomic | (self.fileProtectionEnabled?NSDataWritingFileProtectionComplete:NSDataWritingFileProtectionNone)
                                      error:&error]) {
                   return YES;
               } else {

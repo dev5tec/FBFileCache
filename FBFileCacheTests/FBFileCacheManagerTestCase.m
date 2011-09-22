@@ -239,7 +239,6 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(manager2.usingSize, [self usingSize], nil);
 }
 
-
 //
 // put
 //
@@ -661,8 +660,44 @@ static char* buff[TEST_LIMIT_SIZE*TEST_LIMIT_MAX];
     STAssertEquals(self.fileCacheManager.cacheHitRate, 0.0f, nil);
 }
 
+- (void)testFileProtectionEnabled
+{
+    // setup files
+    [self setupTemporary];
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+    
+    for (int i=0; i < TEST_IMAGE_NUM; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        NSError* error = nil;
+        NSDictionary* attributes = [[NSFileManager defaultManager]
+                                    attributesOfItemAtPath:cachedFile.path
+                                    error:&error];
+        NSLog(@"%@", attributes);
+        STAssertEquals([attributes objectForKey:NSFileProtectionKey], NSFileProtectionNone, nil);
+    }
 
+    self.fileCacheManager.fileProtectionEnabled = YES;
+    [self putAllTestFilesWithManager:self.fileCacheManager];
+
+    for (int i=0; i < TEST_IMAGE_NUM; i++) {
+        NSString* filename = [NSString stringWithFormat:@"image-%02d.png", i];
+        NSURL* url = [NSURL URLWithString:filename relativeToURL:self.baseURL];
+        FBCachedFile* cachedFile = [self.fileCacheManager cachedFileForURL:url];
+        NSError* error = nil;
+        NSDictionary* attributes = [[NSFileManager defaultManager]
+                                    attributesOfItemAtPath:cachedFile.path
+                                    error:&error];
+        STAssertEquals([attributes objectForKey:NSFileProtectionKey], NSFileProtectionComplete, nil);
+    }
+}
+
+
+
+//
 // test reload
+//
 - (void)testReload
 {
     [self setupTemporary];
